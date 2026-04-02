@@ -18,7 +18,6 @@ if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
 $dataFile = __DIR__ . '/../data/bolao.json';
 $dataDir  = dirname($dataFile);
 
-// Cria a pasta /data se não existir
 if (!is_dir($dataDir)) {
     mkdir($dataDir, 0755, true);
 }
@@ -31,7 +30,7 @@ if (!$raw) {
     exit;
 }
 
-$decoded = json_decode($raw, true);
+$incoming = json_decode($raw, true);
 
 if (json_last_error() !== JSON_ERROR_NONE) {
     http_response_code(400);
@@ -39,29 +38,59 @@ if (json_last_error() !== JSON_ERROR_NONE) {
     exit;
 }
 
-// Valida estrutura mínima
-if (!isset($decoded['users']) || !is_array($decoded['users'])) {
+// Espera { "userName": "...", "userData": { palpites: {...} } }
+if (!isset($incoming['userName']) || !isset($incoming['userData'])) {
     http_response_code(400);
-    echo json_encode(['error' => 'Missing users field']);
+    echo json_encode(['error' => 'Missing userName or userData']);
     exit;
 }
 
-// Salva com lock para evitar race condition
+$userName = $incoming['userName'];
+$userData = $incoming['userData'];
+
+// Abre com lock exclusivo para leitura + escrita segura
 $fp = fopen($dataFile, 'c+');
 if (!$fp) {
     http_response_code(500);
-    echo json_encode(['error' => 'Cannot open file for writing']);
+    echo json_encode(['error' => 'Cannot open file']);
     exit;
 }
 
-if (flock($fp, LOCK_EX)) {
-    ftruncate($fp, 0);
-    rewind($fp);
-    fwrite($fp, json_encode($decoded, JSON_UNESCAPED_UNICODE | JSON_PRETTY_PRINT));
-    fflush($fp);
-    flock($fp, LOCK_UN);
+if (!flock($fp, LOCK_EX)) {
+    fclose($fp);
+    http_response_code(500);
+    echo json_encode(['error' => 'Cannot lock file']);
+    exit;
 }
 
+// Lê o estado atual do arquivo (com o lock já adquirido)
+$content = '';
+rewind($fp);
+while (!feof($fp)) {
+    $content .= fread($fp, 8192);
+}
+
+$current = [];
+if ($content !== '') {
+    $parsed = json_decode($content, true);
+    if (json_last_error() === JSON_ERROR_NONE && isset($parsed['users'])) {
+        $current = $parsed['users'];
+    }
+}
+
+// Merge: atualiza apenas o usuário que salvou, preserva os demais
+$current[$userName] = $userData;
+
+$newContent = json_encode(
+    ['users' => $current],
+    JSON_UNESCAPED_UNICODE | JSON_PRETTY_PRINT
+);
+
+ftruncate($fp, 0);
+rewind($fp);
+fwrite($fp, $newContent);
+fflush($fp);
+flock($fp, LOCK_UN);
 fclose($fp);
 
-echo json_encode(['ok' => true, 'users' => count($decoded['users'])]);
+echo json_encode(['ok' => true, 'users' => count($current)]);

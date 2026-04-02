@@ -25,7 +25,7 @@ async function loadFromServer() {
       allUsers = data.users;
     }
   } catch (e) {
-    // Se não tiver PHP rodando, usa localStorage como fallback
+    // Fallback para localStorage se não tiver PHP
     const saved = localStorage.getItem('bolao_data');
     if (saved) allUsers = JSON.parse(saved);
   }
@@ -33,7 +33,12 @@ async function loadFromServer() {
 }
 
 async function saveToServer() {
-  const payload = { users: allUsers };
+  // Envia APENAS os dados do usuário atual — o servidor faz o merge
+  const payload = {
+    userName: currentUser,
+    userData: allUsers[currentUser]
+  };
+
   try {
     await fetch('api/save.php', {
       method: 'POST',
@@ -44,7 +49,7 @@ async function saveToServer() {
     // Fallback para localStorage
     localStorage.setItem('bolao_data', JSON.stringify(allUsers));
   }
-  // Sempre salva no localStorage como cache local
+  // Cache local sempre atualizado
   localStorage.setItem('bolao_data', JSON.stringify(allUsers));
 }
 
@@ -52,38 +57,43 @@ async function saveToServer() {
 
 function login() {
   const nameEl = document.getElementById('login-name');
-  const errEl = document.getElementById('login-error');
-  const name = nameEl.value.trim();
+  const errEl  = document.getElementById('login-error');
+  const name   = nameEl.value.trim();
 
   if (!name) {
     showError(errEl, 'Por favor, informe seu nome.');
     return;
   }
 
-  // Cria usuário se for novo
-  if (!allUsers[name]) {
-    allUsers[name] = { palpites: createEmptyPalpites() };
+  // Recarrega dados frescos do servidor antes de entrar,
+  // para pegar participantes que entraram enquanto esta aba estava aberta
+  loadFromServer().then(() => {
+    if (!allUsers[name]) {
+      allUsers[name] = { palpites: createEmptyPalpites() };
+    }
+
+    currentUser = name;
+    errEl.style.display = 'none';
+    nameEl.value = '';
+
+    // Salva o novo usuário (merge no servidor)
     saveToServer();
-  }
 
-  currentUser = name;
-  errEl.style.display = 'none';
-  nameEl.value = '';
-
-  showScreen('main');
-  renderApp();
+    showScreen('main');
+    renderApp();
+  });
 }
 
 function logout() {
   currentUser = null;
   showScreen('login');
-  renderLoginUsers();
+  // Recarrega lista de participantes ao voltar para o login
+  loadFromServer();
 }
 
-function loginAs(name) {
-  currentUser = name;
-  showScreen('main');
-  renderApp();
+function loginChip(name) {
+  document.getElementById('login-name').value = name;
+  login();
 }
 
 function showError(el, msg) {
@@ -128,15 +138,9 @@ function renderLoginUsers() {
   container.innerHTML = html;
 }
 
-function loginChip(name) {
-  document.getElementById('login-name').value = name;
-  login();
-}
-
 // ── RENDER: APP PRINCIPAL ─────────────────────────────────────────────────────
 
 function renderApp() {
-  // Header
   const initials = currentUser.split(' ').map(w => w[0]).slice(0, 2).join('').toUpperCase();
   document.getElementById('user-badge').innerHTML =
     `<div class="avatar">${initials}</div> <span>${escHtml(currentUser)}</span>`;
@@ -179,13 +183,11 @@ function buildGroupCard(g, teams, matches) {
 
   let html = `<div class="group-card" id="card-${g}">`;
 
-  // Header
   html += `<div class="group-card-header">
     <div class="group-badge">${g}</div>
     <h3>Grupo ${g}</h3>
   </div>`;
 
-  // Tabela de classificação
   html += `<div class="standings-wrap"><table class="standings-table">
     <thead><tr>
       <th>Seleção</th>
@@ -221,7 +223,6 @@ function buildGroupCard(g, teams, matches) {
 
   html += '</tbody></table></div>';
 
-  // Jogos com inputs
   html += `<div class="matches-section">
     <div class="matches-section-label">Jogos</div>`;
 
@@ -231,12 +232,12 @@ function buildGroupCard(g, teams, matches) {
     html += `<div class="match-row">
       <span class="match-home">${FLAGS[m.home] || ''} ${escHtml(m.home)}</span>
       <div class="score-box">
-        <input class="score-input" type="number" min="0" max="20"
+        <input class="score-input" type="number" min="0" max="99"
           value="${hVal}" placeholder="–"
           onchange="updateScore('${g}',${mi},'home',this.value)"
           oninput="updateScore('${g}',${mi},'home',this.value)">
         <span class="score-sep">×</span>
-        <input class="score-input" type="number" min="0" max="20"
+        <input class="score-input" type="number" min="0" max="99"
           value="${aVal}" placeholder="–"
           onchange="updateScore('${g}',${mi},'away',this.value)"
           oninput="updateScore('${g}',${mi},'away',this.value)">
@@ -252,25 +253,23 @@ function buildGroupCard(g, teams, matches) {
 // ── UPDATE DE PLACAR ──────────────────────────────────────────────────────────
 
 function updateScore(g, mi, side, val) {
-  const user = allUsers[currentUser];
+  const user  = allUsers[currentUser];
   const match = user.palpites[g][mi];
 
   if (side === 'home') match.homeGoals = val === '' ? '' : String(parseInt(val) || 0);
-  else match.awayGoals = val === '' ? '' : String(parseInt(val) || 0);
+  else                 match.awayGoals = val === '' ? '' : String(parseInt(val) || 0);
 
-  // Atualiza só a tabela desse grupo sem re-renderizar tudo
   updateGroupStandings(g);
 
-  // Atualiza contador de progresso
   const { filled, total } = countFilled(user.palpites);
   document.getElementById('progress-label').textContent =
     `${filled} / ${total} jogos preenchidos`;
 }
 
 function updateGroupStandings(g) {
-  const user = allUsers[currentUser];
-  const matches = user.palpites[g];
-  const teams = GROUPS[g].teams;
+  const user      = allUsers[currentUser];
+  const matches   = user.palpites[g];
+  const teams     = GROUPS[g].teams;
   const standings = calcStandings(matches, teams);
 
   const table = document.querySelector(`#card-${g} .standings-table tbody`);
@@ -309,73 +308,75 @@ async function saveAll() {
 // ── RENDER: COMPARAR ──────────────────────────────────────────────────────────
 
 function renderCompare() {
-  const names = Object.keys(allUsers);
-  const container = document.getElementById('compare-content');
+  // Recarrega dados frescos antes de comparar
+  loadFromServer().then(() => {
+    const names     = Object.keys(allUsers);
+    const container = document.getElementById('compare-content');
 
-  if (names.length < 2) {
-    container.innerHTML = `<div class="empty-state">
-      <p>Adicione pelo menos 2 participantes para comparar palpites.</p>
-    </div>`;
-    return;
-  }
-
-  // Para cada grupo, mostra a tabela de classificação de cada usuário lado a lado
-  let html = '';
-
-  for (const [g, data] of Object.entries(GROUPS)) {
-    html += `<div class="compare-group-block">
-      <div class="compare-group-title">
-        <div class="compare-badge">${g}</div>
-        Grupo ${g}
-      </div>
-      <div class="compare-standings-row">`;
-
-    for (const name of names) {
-      const matches = allUsers[name].palpites[g];
-      const standings = calcStandings(matches, data.teams);
-
-      html += `<div class="compare-user-block">
-        <div class="compare-user-name">${escHtml(name)}</div>
-        <table class="standings-table">
-          <thead><tr>
-            <th>Seleção</th>
-            <th title="Pontos">Pts</th>
-            <th title="Jogos">J</th>
-            <th title="Vitórias">V</th>
-            <th title="Empates">E</th>
-            <th title="Derrotas">D</th>
-            <th title="Gols Marcados">GM</th>
-            <th title="Gols Sofridos">GS</th>
-            <th title="Saldo de Gols">SG</th>
-          </tr></thead><tbody>`;
-
-      standings.forEach((t, i) => {
-        const rc = i === 0 ? 'q1' : i === 1 ? 'q2' : '';
-        const sg = t.gm - t.gs;
-        html += `<tr class="${rc}">
-          <td><div class="team-cell">
-            <span class="rank">${i + 1}</span>
-            <span class="flag">${FLAGS[t.name] || ''}</span>
-            <span class="team-name">${escHtml(t.name)}</span>
-          </div></td>
-          <td class="pts">${t.pts}</td>
-          <td>${t.pj}</td>
-          <td>${t.v}</td>
-          <td>${t.e}</td>
-          <td>${t.d}</td>
-          <td>${t.gm}</td>
-          <td>${t.gs}</td>
-          <td>${sg >= 0 ? '+' + sg : sg}</td>
-        </tr>`;
-      });
-
-      html += `</tbody></table></div>`;
+    if (names.length < 2) {
+      container.innerHTML = `<div class="empty-state">
+        <p>Adicione pelo menos 2 participantes para comparar palpites.</p>
+      </div>`;
+      return;
     }
 
-    html += `</div></div>`;
-  }
+    let html = '';
 
-  container.innerHTML = html;
+    for (const [g, data] of Object.entries(GROUPS)) {
+      html += `<div class="compare-group-block">
+        <div class="compare-group-title">
+          <div class="compare-badge">${g}</div>
+          Grupo ${g}
+        </div>
+        <div class="compare-standings-row">`;
+
+      for (const name of names) {
+        const matches   = allUsers[name].palpites[g];
+        const standings = calcStandings(matches, data.teams);
+
+        html += `<div class="compare-user-block">
+          <div class="compare-user-name">${escHtml(name)}</div>
+          <table class="standings-table">
+            <thead><tr>
+              <th>Seleção</th>
+              <th title="Pontos">Pts</th>
+              <th title="Jogos">J</th>
+              <th title="Vitórias">V</th>
+              <th title="Empates">E</th>
+              <th title="Derrotas">D</th>
+              <th title="Gols Marcados">GM</th>
+              <th title="Gols Sofridos">GS</th>
+              <th title="Saldo de Gols">SG</th>
+            </tr></thead><tbody>`;
+
+        standings.forEach((t, i) => {
+          const rc = i === 0 ? 'q1' : i === 1 ? 'q2' : '';
+          const sg = t.gm - t.gs;
+          html += `<tr class="${rc}">
+            <td><div class="team-cell">
+              <span class="rank">${i + 1}</span>
+              <span class="flag">${FLAGS[t.name] || ''}</span>
+              <span class="team-name">${escHtml(t.name)}</span>
+            </div></td>
+            <td class="pts">${t.pts}</td>
+            <td>${t.pj}</td>
+            <td>${t.v}</td>
+            <td>${t.e}</td>
+            <td>${t.d}</td>
+            <td>${t.gm}</td>
+            <td>${t.gs}</td>
+            <td>${sg >= 0 ? '+' + sg : sg}</td>
+          </tr>`;
+        });
+
+        html += `</tbody></table></div>`;
+      }
+
+      html += `</div></div>`;
+    }
+
+    container.innerHTML = html;
+  });
 }
 
 // ── UTILS ─────────────────────────────────────────────────────────────────────
