@@ -207,7 +207,6 @@ function buildGroupCard(g, teams, matches) {
     html += `<tr class="${rc}">
       <td><div class="team-cell">
         <span class="rank">${i + 1}</span>
-        <span class="flag">${FLAGS[t.name] || ''}</span>
         <span class="team-name">${escHtml(t.name)}</span>
       </div></td>
       <td class="pts">${t.pts}</td>
@@ -230,7 +229,7 @@ function buildGroupCard(g, teams, matches) {
     const hVal = m.homeGoals !== '' ? m.homeGoals : '';
     const aVal = m.awayGoals !== '' ? m.awayGoals : '';
     html += `<div class="match-row">
-      <span class="match-home">${FLAGS[m.home] || ''} ${escHtml(m.home)}</span>
+      <span class="match-home">${escHtml(m.home)}</span>
       <div class="score-box">
         <input class="score-input" type="number" min="0" max="99"
           value="${hVal}" placeholder="–"
@@ -242,7 +241,7 @@ function buildGroupCard(g, teams, matches) {
           onchange="updateScore('${g}',${mi},'away',this.value)"
           oninput="updateScore('${g}',${mi},'away',this.value)">
       </div>
-      <span class="match-away">${escHtml(m.away)} ${FLAGS[m.away] || ''}</span>
+      <span class="match-away">${escHtml(m.away)}</span>
     </div>`;
   });
 
@@ -284,7 +283,6 @@ function updateGroupStandings(g) {
     const cells = row.querySelectorAll('td');
     cells[0].innerHTML = `<div class="team-cell">
       <span class="rank">${i + 1}</span>
-      <span class="flag">${FLAGS[t.name] || ''}</span>
       <span class="team-name">${escHtml(t.name)}</span>
     </div>`;
     cells[1].textContent = t.pts;
@@ -355,7 +353,6 @@ function renderCompare() {
           html += `<tr class="${rc}">
             <td><div class="team-cell">
               <span class="rank">${i + 1}</span>
-              <span class="flag">${FLAGS[t.name] || ''}</span>
               <span class="team-name">${escHtml(t.name)}</span>
             </div></td>
             <td class="pts">${t.pts}</td>
