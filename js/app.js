@@ -320,9 +320,11 @@ function renderCompare() {
 
     for (const [g, data] of Object.entries(GROUPS)) {
       html += `<div class="compare-group-block">
-        <div class="compare-group-title">
-          <div class="compare-badge">${g}</div>
-          Grupo ${g}
+        <div class="compare-group-divider">
+          <div class="compare-group-title">
+            <div class="compare-badge">${g}</div>
+            Grupo ${g}
+          </div>
         </div>
         <div class="compare-standings-row">`;
 
