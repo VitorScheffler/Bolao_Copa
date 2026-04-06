@@ -14,7 +14,6 @@
   <div id="screen-login" class="screen active">
     <div class="login-wrap">
       <div class="login-logo">
-        <span class="logo-icon">⚽</span>
         <h1>Bolão Copa do Mundo</h1>
         <p>Fase de grupos · 12 grupos · 72 jogos</p>
       </div>
@@ -36,7 +35,6 @@
 
     <header class="main-header">
       <div class="header-left">
-        <span class="logo-sm">⚽</span>
         <span class="app-title">Bolão Copa do Mundo</span>
       </div>
       <div class="header-center">
@@ -47,6 +45,7 @@
       </div>
       <div class="header-right">
         <div class="user-badge" id="user-badge"></div>
+        <button class="theme-toggle" onclick="toggleTheme()" id="theme-btn" title="Alternar modo escuro" aria-label="Alternar modo escuro">🌙</button>
         <button class="btn btn-ghost btn-sm" onclick="logout()">Sair</button>
       </div>
     </header>
@@ -59,7 +58,7 @@
           <h2>Meus Palpites</h2>
           <div class="view-actions">
             <span id="progress-label" class="progress-label"></span>
-            <button class="btn btn-primary btn-sm" onclick="saveAll()">💾 Salvar tudo</button>
+            <button class="btn btn-primary btn-sm" onclick="saveAll()">Salvar tudo</button>
           </div>
         </div>
         <div id="groups-grid" class="groups-grid"></div>

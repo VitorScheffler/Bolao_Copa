@@ -8,12 +8,34 @@ let currentView = 'meus-palpites';
 
 document.addEventListener('DOMContentLoaded', () => {
   loadFromServer();
+  initTheme();
 
   // Enter no campo de nome faz login
   document.getElementById('login-name').addEventListener('keydown', e => {
     if (e.key === 'Enter') login();
   });
 });
+
+// ── TEMA (DARK MODE) ──────────────────────────────────────────────────────────
+
+function initTheme() {
+  const saved = localStorage.getItem('bolao_theme');
+  const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+  const isDark = saved ? saved === 'dark' : prefersDark;
+  applyTheme(isDark);
+}
+
+function applyTheme(dark) {
+  document.documentElement.setAttribute('data-theme', dark ? 'dark' : 'light');
+  const btn = document.getElementById('theme-btn');
+  if (btn) btn.textContent = dark ? '☀️' : '🌙';
+  localStorage.setItem('bolao_theme', dark ? 'dark' : 'light');
+}
+
+function toggleTheme() {
+  const isDark = document.documentElement.getAttribute('data-theme') === 'dark';
+  applyTheme(!isDark);
+}
 
 // ── PERSISTÊNCIA (servidor via PHP) ──────────────────────────────────────────
 
