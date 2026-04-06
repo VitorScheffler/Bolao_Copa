@@ -165,8 +165,6 @@ function renderGroups() {
     `${filled} / ${total} jogos preenchidos`;
 
   let html = '<div class="legend">';
-  html += '<div class="legend-item"><div class="legend-bar" style="background:#16a34a"></div>Classificado (1º)</div>';
-  html += '<div class="legend-item"><div class="legend-bar" style="background:#2563eb"></div>Classificado (2º)</div>';
   html += '</div>';
 
   html += '<div class="groups-grid-inner" style="display:grid;grid-template-columns:repeat(auto-fill,minmax(370px,1fr));gap:1.25rem">';
