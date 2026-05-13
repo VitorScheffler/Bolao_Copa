@@ -197,6 +197,7 @@ function renderGroups() {
   }
 
   let html = bannerHtml;
+  html += '<div class="groups-grid-inner" style="display:grid;grid-template-columns:repeat(auto-fill,minmax(370px,1fr));gap:1.25rem">';
 
   for (const [g, data] of Object.entries(GROUPS)) {
     html += buildGroupCard(g, data.teams, user.palpites[g], cupStarted);
@@ -338,86 +339,27 @@ async function saveAll() {
 // ── MODAL CONTAGEM REGRESSIVA ─────────────────────────────────────────────────
 
 function showCountdownModal() {
-  const agora = new Date();
-  const diffMs = CUP_START - agora;
-
-  const days = Math.floor(diffMs / (1000 * 60 * 60 * 24));
-
-  const hours = Math.floor(
-    (diffMs % (1000 * 60 * 60 * 24)) /
-    (1000 * 60 * 60)
-  );
-
-  const minutes = Math.floor(
-    (diffMs % (1000 * 60 * 60)) /
-    (1000 * 60)
-  );
-
-  const seconds = Math.floor(
-    (diffMs % (1000 * 60)) / 1000
-  );
+  const today  = new Date();
+  const diffMs = CUP_START - today;
+  const days   = diffMs > 0 ? Math.ceil(diffMs / 86400000) : 0;
 
   const overlay = document.createElement('div');
-
   overlay.id = 'countdown-overlay';
-
   overlay.innerHTML = `
     <div class="cd-modal">
-
-      <div class="contagem">
-
-        <div class="contagem-item">
-          <span>${days}</span>
-          <small>Dias</small>
-        </div>
-
-        <div class="contagem-item">
-          <span>${String(hours).padStart(2, '0')}</span>
-          <small>Horas</small>
-        </div>
-
-        <div class="contagem-item">
-          <span>${String(minutes).padStart(2, '0')}</span>
-          <small>Minutos</small>
-        </div>
-
-        <div class="contagem-item">
-          <span>${String(seconds).padStart(2, '0')}</span>
-          <small>Segundos</small>
-        </div>
-
+      <div class="cd-circle">
+        <span class="cd-num">${days}</span>
+        <span class="cd-lbl">DIAS</span>
       </div>
-
-      <h2 class="cd-title">
-        A Copa está chegando! ⚽
-      </h2>
-
-      <p class="cd-sub">
-        Faltam
-        <strong>
-          ${days} dia${days !== 1 ? 's' : ''}
-        </strong>
-        para a Copa do Mundo.
-        <br>
-        Não deixe para a última hora!
-      </p>
-
+      <h2 class="cd-title">A Copa está chegando! ⚽</h2>
+      <p class="cd-sub">Faltam <strong>${days} dia${days !== 1 ? 's' : ''}</strong> para a Copa do Mundo.<br>Não deixe para a última hora!</p>
       <div class="cd-warn">
-        ⚠️ Participantes sem palpites completos serão
-        <strong>desclassificados</strong>
-        do bolão. Preencha todos os 72 jogos antes do início da competição.
+        ⚠️ Participantes sem palpites completos serão <strong>desclassificados</strong> do bolão. Preencha todos os 72 jogos antes do início da competição.
       </div>
-
-      <button
-        class="btn btn-primary btn-full"
-        onclick="document.getElementById('countdown-overlay').remove()"
-      >
+      <button class="btn btn-primary btn-full" onclick="document.getElementById('countdown-overlay').remove()">
         Entendido, vou preencher!
       </button>
-
-    </div>
-  `;
-
+    </div>`;
   document.body.appendChild(overlay);
 }
 
