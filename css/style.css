@@ -1030,58 +1030,357 @@ input[type=number]::-webkit-inner-spin-button { -webkit-appearance: none; }
   margin-top: 2px;
 }
 
-.bracket {
-  display: flex;
-  gap: 40px;
+/* ═══════════════════════════════════════════════════════════
+   CHAVEAMENTO / BRACKET — Copa do Mundo 2026
+   ═══════════════════════════════════════════════════════════ */
+
+/* ── Wrapper principal ─────────────────────────────────────── */
+.bracket-outer {
+  width: 100%;
   overflow-x: auto;
-  padding: 20px;
-  min-height: 800px;
+  padding-bottom: 1.5rem;
 }
 
-.round {
+.bracket-scroll {
+  display: inline-flex;
+  align-items: center;
+  gap: 0;
+  min-width: max-content;
+  padding: 1.5rem 1rem;
+}
+
+/* ── Colunas de fase ────────────────────────────────────────── */
+.bracket-col {
   display: flex;
   flex-direction: column;
   justify-content: space-around;
-  min-width: 220px;
+  min-width: 200px;
 }
 
-.round-title {
+.bracket-col-label {
   text-align: center;
-  font-weight: bold;
-  margin-bottom: 20px;
-  font-size: 18px;
+  font-size: 10px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.12em;
+  color: var(--text-faint);
+  margin-bottom: 10px;
+  padding: 4px 0;
+  border-bottom: 2px solid var(--border);
 }
 
-.match-card {
+/* ── Conector SVG ────────────────────────────────────────────── */
+.bracket-connector {
+  width: 32px;
+  flex-shrink: 0;
+  align-self: stretch;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-around;
+}
+
+.bracket-connector svg {
+  width: 100%;
+  height: 100%;
+  overflow: visible;
+}
+
+/* ── Slot de jogo ────────────────────────────────────────────── */
+.b-slot {
+  display: flex;
+  flex-direction: column;
+  margin: 6px 0;
+  position: relative;
+  animation: fadeInSlot 0.3s ease both;
+}
+
+@keyframes fadeInSlot {
+  from { opacity: 0; transform: translateY(6px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+/* ── Card do jogo ────────────────────────────────────────────── */
+.b-card {
   background: var(--bg-card);
   border: 1px solid var(--border-md);
-  border-radius: 12px;
-  padding: 12px;
-  margin: 20px 0;
-  min-width: 220px;
-  box-shadow: 0 2px 8px rgba(0,0,0,.15);
+  border-radius: 10px;
+  overflow: hidden;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+  transition: box-shadow 0.2s, border-color 0.2s;
+  min-width: 190px;
 }
 
-.team-row {
+.b-card:hover {
+  border-color: var(--blue);
+  box-shadow: 0 4px 16px rgba(0,0,0,0.14);
+}
+
+/* ── Linha de time ───────────────────────────────────────────── */
+.b-team {
   display: flex;
   align-items: center;
-  justify-content: space-between;
-  gap: 10px;
-  margin: 6px 0;
+  gap: 8px;
+  padding: 7px 10px;
+  border-bottom: 1px solid var(--border);
+  position: relative;
+  transition: background 0.15s;
 }
 
-.team-row span {
-  font-size: 13px;
-  font-weight: 600;
+.b-team:last-child {
+  border-bottom: none;
+}
+
+.b-team.winner {
+  background: var(--green-bg);
+}
+
+.b-team.winner .b-team-name {
+  color: var(--green-text);
+  font-weight: 700;
+}
+
+.b-team-flag {
+  font-size: 16px;
+  width: 20px;
+  text-align: center;
+  flex-shrink: 0;
+}
+
+.b-team-name {
   flex: 1;
+  font-size: 12px;
+  font-weight: 500;
+  color: var(--text);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  max-width: 110px;
 }
 
-.team-row input {
-  width: 50px;
-  height: 32px;
-  border-radius: 8px;
+.b-team-name.tbd {
+  color: var(--text-faint);
+  font-style: italic;
+  font-weight: 400;
+}
+
+/* ── Input de placar ─────────────────────────────────────────── */
+.b-score-input {
+  width: 30px;
+  height: 24px;
+  text-align: center;
+  font-size: 13px;
+  font-weight: 700;
+  font-family: inherit;
   border: 1px solid var(--border-md);
+  border-radius: 6px;
   background: var(--bg-input);
   color: var(--text);
+  outline: none;
+  transition: border-color 0.15s, background 0.15s;
+  flex-shrink: 0;
+  -moz-appearance: textfield;
+  appearance: textfield;
+}
+
+.b-score-input::-webkit-outer-spin-button,
+.b-score-input::-webkit-inner-spin-button {
+  -webkit-appearance: none;
+}
+
+.b-score-input:focus {
+  border-color: var(--blue);
+  background: var(--bg-card);
+}
+
+.b-score-input:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+/* ── Label do jogo (número) ──────────────────────────────────── */
+.b-card-label {
   text-align: center;
+  font-size: 9px;
+  color: var(--text-faint);
+  font-weight: 600;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  padding: 3px 0 0;
+}
+
+/* ── Conector horizontal entre rounds ───────────────────────── */
+.b-lines {
+  flex-shrink: 0;
+  align-self: stretch;
+}
+
+/* ── Trofeu final ────────────────────────────────────────────── */
+.b-trophy {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 1rem;
+  gap: 8px;
+}
+
+.b-trophy-icon {
+  font-size: 40px;
+  filter: drop-shadow(0 2px 8px rgba(245,158,11,0.5));
+  animation: trophyPulse 2s ease-in-out infinite;
+}
+
+@keyframes trophyPulse {
+  0%, 100% { transform: scale(1);   filter: drop-shadow(0 2px 8px rgba(245,158,11,0.4)); }
+  50%       { transform: scale(1.08); filter: drop-shadow(0 4px 16px rgba(245,158,11,0.7)); }
+}
+
+.b-trophy-label {
+  font-size: 11px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  color: var(--amber);
+}
+
+/* ── Legenda de fases ─────────────────────────────────────────── */
+.bracket-phase-labels {
+  display: flex;
+  gap: 0;
+  margin-bottom: 0.5rem;
+  overflow-x: auto;
+}
+
+.bracket-phase-label {
+  flex: 1;
+  min-width: 200px;
+  text-align: center;
+  padding: 8px 12px;
+  font-size: 11px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  color: var(--text-faint);
+  border-bottom: 2px solid var(--border);
+}
+
+.bracket-phase-label.active {
+  color: var(--blue-text);
+  border-bottom-color: var(--blue);
+  background: var(--blue-bg);
+  border-radius: 6px 6px 0 0;
+}
+
+/* ── Conector SVG paths ───────────────────────────────────────── */
+.b-connector {
+  width: 32px;
+  min-width: 32px;
+  flex-shrink: 0;
+  position: relative;
+}
+
+.b-connector canvas,
+.b-connector svg {
+  position: absolute;
+  top: 0; left: 0;
+  width: 100%; height: 100%;
+}
+
+/* ── Info do bracket ──────────────────────────────────────────── */
+.bracket-info {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  padding: 8px 0 16px;
+  flex-wrap: wrap;
+}
+
+.bracket-legend-item {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 11px;
+  color: var(--text-muted);
+}
+
+.bracket-legend-dot {
+  width: 10px;
+  height: 10px;
+  border-radius: 3px;
+  flex-shrink: 0;
+}
+
+/* ── Responsivo mobile ───────────────────────────────────────── */
+@media (max-width: 768px) {
+  .b-card {
+    min-width: 160px;
+  }
+  .bracket-col {
+    min-width: 164px;
+  }
+  .b-team-name {
+    max-width: 80px;
+  }
+}
+
+/* ── Fase selecionada highlight ───────────────────────────────── */
+.b-card.highlight-round {
+  border-color: var(--amber);
+  box-shadow: 0 0 0 2px var(--amber-bg), 0 4px 12px rgba(0,0,0,0.1);
+}
+
+/* ── Pending (não tem times definidos) ────────────────────────── */
+.b-card.pending {
+  opacity: 0.55;
+  border-style: dashed;
+}
+
+/* ── Connector lines drawn with CSS ──────────────────────────── */
+.connector-wrap {
+  display: flex;
+  flex-direction: column;
+  justify-content: space-around;
+  width: 28px;
+  flex-shrink: 0;
+  align-self: stretch;
+}
+
+.connector-pair {
+  display: flex;
+  flex-direction: column;
+  position: relative;
+  align-items: flex-start;
+}
+
+.connector-pair::before,
+.connector-pair::after {
+  content: '';
+  position: absolute;
+  left: 0;
+  width: 14px;
+  height: 50%;
+  border-right: 2px solid var(--border-md);
+}
+
+.connector-pair::before {
+  top: 0;
+  border-top: 2px solid var(--border-md);
+  border-top-right-radius: 4px;
+}
+
+.connector-pair::after {
+  bottom: 0;
+  border-bottom: 2px solid var(--border-md);
+  border-bottom-right-radius: 4px;
+}
+
+/* horizontal line from connector to next card */
+.connector-mid {
+  position: absolute;
+  left: 14px;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 14px;
+  height: 2px;
+  background: var(--border-md);
 }
