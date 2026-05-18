@@ -75,27 +75,49 @@ async function saveToServer() {
 // ── AUTENTICAÇÃO ──────────────────────────────────────────────────────────────
 
 function login() {
+
   const nameEl = document.getElementById('login-name');
   const errEl  = document.getElementById('login-error');
-  const name   = nameEl.value.trim();
+
+  const name = nameEl.value.trim();
 
   if (!name) {
     showError(errEl, 'Por favor, informe seu nome.');
     return;
   }
 
+  // ── senha do usuário OFICIAL ─────────────────────
+  if (name === 'OFICIAL') {
+
+    const senha = prompt('Digite a senha do administrador');
+
+    // ALTERE AQUI
+    const ADMIN_PASSWORD = 'COPA2026';
+
+    if (senha !== ADMIN_PASSWORD) {
+      showError(errEl, 'Senha inválida.');
+      return;
+    }
+  }
+
   loadFromServer().then(() => {
+
     if (!allUsers[name]) {
-      allUsers[name] = { palpites: createEmptyPalpites() };
+      allUsers[name] = {
+        palpites: createEmptyPalpites()
+      };
     }
 
     currentUser = name;
+
     errEl.style.display = 'none';
+
     nameEl.value = '';
 
     saveToServer();
 
     showScreen('main');
+
     renderApp();
 
     if (new Date() < CUP_START) {
@@ -129,19 +151,55 @@ function showScreen(name) {
 
 function setView(name, btn) {
   currentView = name;
-  document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('active'));
-  btn.classList.add('active');
-  document.querySelectorAll('.view').forEach(v => v.classList.remove('active'));
-  document.getElementById('view-' + name).classList.add('active');
 
-  if (name === 'comparar') renderCompare();
-  if (name === 'chaveamento')  renderChaveamento();
+  document.querySelectorAll('.main-nav .nav-btn').forEach(b => {
+    b.classList.remove('active');
+  });
+
+  if (btn) {
+    btn.classList.add('active');
+  }
+
+  document.querySelectorAll('.view').forEach(v => {
+    v.classList.remove('active');
+  });
+
+  const targetView = document.getElementById('view-' + name);
+
+  if (!targetView) {
+    console.error('View não encontrada:', name);
+    return;
+  }
+
+  targetView.classList.add('active');
+
+  // renders
+  if (name === 'comparar') {
+    renderCompare();
+  }
+
+  if (name === 'meu-chaveamento') {
+    renderChaveamento();
+  }
+
+  if (name === 'minha-classificacao') {
+    renderGroups();
+  }
+
+  if (name === 'classificacao') {
+    renderClassificacao();
+  }
+
+  if (name === 'chaveamento') {
+    renderChaveamento();
+  }
 }
 
 // ── RENDER: LOGIN ─────────────────────────────────────────────────────────────
 
 function renderLoginUsers() {
-  const names = Object.keys(allUsers);
+  const names = Object.keys(allUsers)
+  .filter(name => name !== 'OFICIAL');
   const container = document.getElementById('login-users-list');
   if (!names.length) { container.innerHTML = ''; return; }
 
@@ -428,11 +486,11 @@ function showCountdownModal() {
 
 // Nomes das fases
 const PHASE_NAMES = {
-  r32:   'Oitavas',
-  r16:   'Quartas',
-  r8:    'Semi',
-  r4:    'Final',
-  r2:    '🏆'
+  r32:   '16 Avos',
+  r16:   'Oitavas',
+  r8:    'Quartas',
+  r4:    'Semifinais',
+  r2:    'Final'
 };
 
 // Estado do chaveamento em memória (separado do palpites de grupos)
@@ -559,63 +617,182 @@ function updateBracketAwayOverride(idx, val) {
   saveBracket();
 }
 
-// ── Render principal do chaveamento ─────────────────────────────────
-function renderChaveamento() {
-  loadFromServer().then(() => {
-    const container = document.getElementById('chaveamento-content');
-    const oficial   = allUsers['OFICIAL'];
+// ── COMPARAR PALPITES ───────────────────────────────────────────────
 
-    if (!oficial) {
-      container.innerHTML = `
-        <div class="empty-state" style="padding:3rem;text-align:center;color:var(--text-muted)">
-          <div style="font-size:48px;margin-bottom:1rem">⏳</div>
-          <p style="font-size:16px;font-weight:600;margin-bottom:8px">Aguardando resultados</p>
-          <p style="font-size:13px">Os resultados da fase de grupos ainda não foram inseridos pelo administrador (OFICIAL).</p>
-        </div>`;
+function renderCompare() {
+  loadFromServer().then(() => {
+    const names     = Object.keys(allUsers);
+    const container = document.getElementById('compare-content');
+
+    if (names.length < 2) {
+      container.innerHTML = `<div class="empty-state">
+        <p>Adicione pelo menos 2 participantes para comparar palpites.</p>
+      </div>`;
       return;
     }
 
-    // Inicializa ou carrega estado salvo
-    const savedBracket = allUsers[currentUser]?.bracket || {};
-    if (!bracketState) {
-      bracketState = initBracketState();
-      // Copia dados salvos
-      for (const phase of ['r32','r16','r8','r4','r2']) {
-        if (savedBracket[phase]) {
-          savedBracket[phase].forEach((g, i) => {
-            if (bracketState[phase][i]) Object.assign(bracketState[phase][i], g);
-          });
+    let html = '';
+
+    for (const [g, data] of Object.entries(GROUPS)) {
+      html += `<div class="compare-group-block">
+        <div class="compare-group-divider">
+          <div class="compare-group-title">
+            <div class="compare-badge">${g}</div>
+            Grupo ${g}
+          </div>
+        </div>
+        <div class="compare-standings-row">`;
+
+      for (const name of names) {
+        // evita quebrar caso usuário esteja incompleto
+        if (
+          !allUsers[name] ||
+          !allUsers[name].palpites ||
+          !allUsers[name].palpites[g]
+        ) {
+          continue;
         }
+
+        const matches   = allUsers[name].palpites[g];
+        const standings = calcStandings(matches, data.teams);
+
+        html += `<div class="compare-user-block">
+          <div class="compare-user-name">${escHtml(name)}</div>
+          <table class="standings-table">
+            <thead><tr>
+              <th>Seleção</th>
+              <th title="Pontos">Pts</th>
+              <th title="Jogos">J</th>
+              <th title="Vitórias">V</th>
+              <th title="Empates">E</th>
+              <th title="Derrotas">D</th>
+              <th title="Gols Marcados">GM</th>
+              <th title="Gols Sofridos">GS</th>
+              <th title="Saldo de Gols">SG</th>
+            </tr></thead><tbody>`;
+
+        standings.forEach((t, i) => {
+          const rc = i === 0 ? 'q1' : i === 1 ? 'q2' : '';
+          const sg = t.gm - t.gs;
+          html += `<tr class="${rc}">
+            <td><div class="team-cell">
+              <span class="rank">${i + 1}</span>
+              <span class="team-name">${escHtml(t.name)}</span>
+            </div></td>
+            <td class="pts">${t.pts}</td>
+            <td>${t.pj}</td>
+            <td>${t.v}</td>
+            <td>${t.e}</td>
+            <td>${t.d}</td>
+            <td>${t.gm}</td>
+            <td>${t.gs}</td>
+            <td>${sg >= 0 ? '+' + sg : sg}</td>
+          </tr>`;
+        });
+
+        html += `</tbody></table></div>`;
       }
+
+      html += `</div></div>`;
     }
 
-    // Monta oitavas a partir dos grupos oficiais
-    const r32 = buildR32fromGroups(oficial.palpites, bracketState);
+    container.innerHTML = html;
+  });
+}
+
+// ── Render principal do chaveamento ─────────────────────────────────
+function renderChaveamento() {
+
+  loadFromServer().then(() => {
+
+    const container =
+      currentView === 'meu-chaveamento'
+        ? document.getElementById('meu-chaveamento-content')
+        : document.getElementById('chaveamento-content');
+
+    const oficial = allUsers['OFICIAL'];
+
+    if (!oficial || !oficial.palpites) {
+
+      container.innerHTML = `
+        <div class="empty-state">
+          <p>O chaveamento oficial ainda não foi definido.</p>
+        </div>
+      `;
+
+      return;
+    }
+
+    const isOficial = currentUser === 'OFICIAL';
+
+    // bracket do usuário atual
+    const savedBracket =
+      allUsers[currentUser]?.bracket || {};
+
+    // cria estrutura vazia
+    bracketState = initBracketState();
+
+    // restaura dados salvos do usuário
+    for (const phase of ['r32','r16','r8','r4','r2']) {
+
+      if (!savedBracket[phase]) continue;
+
+      savedBracket[phase].forEach((g, i) => {
+
+        if (bracketState[phase][i]) {
+
+          Object.assign(
+            bracketState[phase][i],
+            g
+          );
+
+        }
+
+      });
+
+    }
+
+    // SEMPRE usa a classificação OFICIAL
+    const r32 = buildR32fromGroups(
+      oficial.palpites,
+      bracketState
+    );
+
     r32.forEach((g, i) => {
-      Object.assign(bracketState.r32[i], g);
+
+      Object.assign(
+        bracketState.r32[i],
+        g
+      );
+
     });
 
-    // Propaga vencedores
+    // propaga vencedores
     propagateWinners(bracketState);
 
-    // Renderiza
+    // render
     renderBracketUI();
+
   });
+
 }
 
 // ── Renderiza o bracket visual ───────────────────────────────────────
 function renderBracketUI() {
-  const container = document.getElementById('chaveamento-content');
+  const container =
+  currentView === 'meu-chaveamento'
+    ? document.getElementById('meu-chaveamento-content')
+    : document.getElementById('chaveamento-content');
   if (!container || !bracketState) return;
 
   const isOficial = currentUser === 'OFICIAL';
 
   const phases = [
-    { key: 'r32', label: 'Oitavas de Final',  count: 16 },
-    { key: 'r16', label: 'Quartas de Final',   count: 8  },
-    { key: 'r8',  label: 'Semifinais',         count: 4  },
-    { key: 'r4',  label: 'Final',              count: 2  },
-    { key: 'r2',  label: '🏆 Campeão',         count: 1  },
+    { key: 'r32', label: '16 Avos',  count: 16 },
+    { key: 'r16', label: 'Oitavas',   count: 8  },
+    { key: 'r8',  label: 'Quartas',         count: 4  },
+    { key: 'r4',  label: 'Semifinais',              count: 2  },
+    { key: 'r2',  label: 'Final',         count: 1  },
   ];
 
   // ── Divide as oitavas em dois lados (esquerdo / direito) ──────────
@@ -647,13 +824,13 @@ function renderBracketUI() {
       <div class="bracket-scroll" id="bracket-scroll">`;
 
   // ── Renderiza lado esquerdo ───────────────────────────────────────
-  html += buildColumn('Oitavas', leftR32,  'r32', 0, 8, isOficial);
+  html += buildColumn('16 Avos', leftR32,  'r32', 0, 8, isOficial);
   html += buildConnectors(8);
-  html += buildColumn('Quartas', leftR16,  'r16', 0, 4, isOficial);
+  html += buildColumn('Oitavas', leftR16,  'r16', 0, 4, isOficial);
   html += buildConnectors(4);
-  html += buildColumn('Semi',    leftR8,   'r8',  0, 2, isOficial);
+  html += buildColumn('Quartas',    leftR8,   'r8',  0, 2, isOficial);
   html += buildConnectors(2);
-  html += buildColumn('Final',   leftR4,   'r4',  0, 1, isOficial);
+  html += buildColumn('Semifinais',   leftR4,   'r4',  0, 1, isOficial);
 
   // ── Centro: troféu ────────────────────────────────────────────────
   html += buildCenterTrophy();
@@ -661,7 +838,7 @@ function renderBracketUI() {
   // ── Renderiza lado direito (espelhado) ────────────────────────────
   html += buildColumn('Final',   rightR4,  'r4',  1, 2, isOficial);
   html += buildConnectors(2, true);
-  html += buildColumn('Semi',    rightR8,  'r8',  2, 4, isOficial);
+  html += buildColumn('Semifinais',    rightR8,  'r8',  2, 4, isOficial);
   html += buildConnectors(4, true);
   html += buildColumn('Quartas', rightR16, 'r16', 4, 8, isOficial);
   html += buildConnectors(8, true);
@@ -819,6 +996,203 @@ function buildCenterTrophy() {
       }
     </div>`;
 }
+
+// ── CLASSIFICAÇÃO OFICIAL ───────────────────────────────────────────
+
+function renderClassificacao() {
+  const container = document.getElementById('classificacao-content');
+
+  if (!container) return;
+
+  // cria usuário OFICIAL automaticamente
+  if (!allUsers['OFICIAL']) {
+    allUsers['OFICIAL'] = {};
+  }
+
+  if (!allUsers['OFICIAL'].palpites) {
+    allUsers['OFICIAL'].palpites = createEmptyPalpites();
+  }
+
+  const oficial = allUsers['OFICIAL'];
+
+  if (!oficial || !oficial.palpites) {
+    container.innerHTML = `
+      <div class="empty-state">
+        <p>Classificação oficial ainda não disponível.</p>
+      </div>
+    `;
+    return;
+  }
+
+  const isAdmin = currentUser === 'OFICIAL';
+
+  let html = '';
+
+  // reutiliza o MESMO visual da minha classificação
+  for (const [g, data] of Object.entries(GROUPS)) {
+
+    html += buildOfficialStyledGroupCard(
+      g,
+      data.teams,
+      oficial.palpites[g],
+      !isAdmin
+    );
+
+  }
+
+  container.innerHTML = html;
+}
+
+function buildOfficialStyledGroupCard(g, teams, matches, disabled) {
+
+  const standings = calcStandings(matches, teams);
+
+  let html = `<div class="group-card" id="official-card-${g}">`;
+
+  html += `
+    <div class="group-card-header">
+      <div class="group-badge">${g}</div>
+      <h3>Grupo ${g}</h3>
+    </div>
+  `;
+
+  // tabela
+  html += `
+    <div class="standings-wrap">
+      <table class="standings-table">
+        <thead>
+          <tr>
+            <th>Seleção</th>
+            <th title="Pontos">Pts</th>
+            <th title="Jogos">J</th>
+            <th title="Vitórias">V</th>
+            <th title="Empates">E</th>
+            <th title="Derrotas">D</th>
+            <th title="Gols Marcados">GM</th>
+            <th title="Gols Sofridos">GS</th>
+            <th title="Saldo">SG</th>
+          </tr>
+        </thead>
+        <tbody>
+  `;
+
+  standings.forEach((t, i) => {
+
+    const rc =
+      i === 0 ? 'q1' :
+      i === 1 ? 'q2' : '';
+
+    const sg = t.gm - t.gs;
+
+    html += `
+      <tr class="${rc}">
+        <td>
+          <div class="team-cell">
+            <span class="rank">${i + 1}</span>
+            <span class="team-name">
+              ${escHtml(t.name)}
+            </span>
+          </div>
+        </td>
+
+        <td class="pts">${t.pts}</td>
+        <td>${t.pj}</td>
+        <td>${t.v}</td>
+        <td>${t.e}</td>
+        <td>${t.d}</td>
+        <td>${t.gm}</td>
+        <td>${t.gs}</td>
+        <td>${sg >= 0 ? '+' + sg : sg}</td>
+      </tr>
+    `;
+  });
+
+  html += `
+      </tbody>
+    </table>
+  </div>
+  `;
+
+  // jogos
+  html += `
+    <div class="matches-section">
+      <div class="matches-section-label">
+        Resultados Oficiais
+      </div>
+  `;
+
+  matches.forEach((m, mi) => {
+
+    html += `
+      <div class="match-row">
+
+        <span class="match-home">
+          ${escHtml(m.home)}
+        </span>
+
+        <div class="score-box">
+
+          <input
+            class="score-input"
+            type="number"
+            min="0"
+            max="99"
+            value="${m.homeGoals}"
+            placeholder="–"
+            ${disabled ? 'disabled' : ''}
+            onchange="updateOfficialScore('${g}', ${mi}, 'home', this.value)"
+            oninput="updateOfficialScore('${g}', ${mi}, 'home', this.value)"
+          >
+
+          <span class="score-sep">×</span>
+
+          <input
+            class="score-input"
+            type="number"
+            min="0"
+            max="99"
+            value="${m.awayGoals}"
+            placeholder="–"
+            ${disabled ? 'disabled' : ''}
+            onchange="updateOfficialScore('${g}', ${mi}, 'away', this.value)"
+            oninput="updateOfficialScore('${g}', ${mi}, 'away', this.value)"
+          >
+
+        </div>
+
+        <span class="match-away">
+          ${escHtml(m.away)}
+        </span>
+
+      </div>
+    `;
+  });
+
+  html += `</div></div>`;
+
+  return html;
+}
+
+async function updateOfficialScore(g, mi, side, val) {
+  if (currentUser !== 'OFICIAL') return;
+
+  const oficial = allUsers['OFICIAL'];
+
+  const match = oficial.palpites[g][mi];
+
+  match[
+    side === 'home'
+      ? 'homeGoals'
+      : 'awayGoals'
+  ] = val === ''
+      ? ''
+      : String(parseInt(val) || 0);
+
+  await saveToServer();
+
+  renderClassificacao();
+}
+
 // ── UTILS ─────────────────────────────────────────────────────────────────────
 
 function escHtml(str) {

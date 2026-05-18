@@ -109,8 +109,9 @@
       <div class="header-center">
         <nav class="main-nav">
           <button class="nav-btn active" data-view="meus-palpites" onclick="setView('meus-palpites', this)">Meus Palpites</button>
-          <button class="nav-btn" data-view="comparar" onclick="setView('comparar', this)">Comparar</button>
-          <button class="nav-btn" data-view="chaveamento" onclick="setView('chaveamento', this)">Chaveamento</button>
+          <button class="nav-btn" data-view="comparar" onclick="setView('comparar', this)">Comparar Classificação</button>
+          <button class="nav-btn" data-view="classificacao" onclick="setView('classificacao', this)">Classificação Oficial</button>
+          <button class="nav-btn" data-view="chaveamento" onclick="setView('chaveamento', this)">Chaveamento Oficial</button>
         </nav>
       </div>
       <div class="header-right">
@@ -126,20 +127,55 @@
       <div id="view-meus-palpites" class="view active">
         <div class="view-header">
           <h2>Meus Palpites</h2>
+          <div class="view-actions"></div>
+        </div>
+        <div class="view-shortcuts">
+          <button class="btn btn-primary btn-sm" data-view="minha-classificacao" onclick="setView('minha-classificacao', this)">Minha Classificação</button>
+          <button class="btn btn-primary btn-sm" data-view="meu-chaveamento" onclick="setView('meu-chaveamento', this)">Meu Chaveamento</button>
+        </div>
+      </div>
+
+      <!-- VIEW: MINHA CLASSIFICAÇÃO -->
+      <div id="view-minha-classificacao" class="view">
+        <div class="view-header">
+          <h2>Minha Classificação</h2>
           <div class="view-actions">
             <span id="progress-label" class="progress-label"></span>
             <button class="btn btn-primary btn-sm" onclick="saveAll()">Salvar tudo</button>
           </div>
         </div>
+        <button class="btn btn-primary btn-sm" onclick="setView('meus-palpites', this)">Voltar</button>
         <div id="groups-grid" class="groups-grid"></div>
+      </div>
+
+      <!-- VIEW: MEU CHAVEAMENTO -->
+      <div id="view-meu-chaveamento" class="view">
+        <div class="view-header">
+          <h2>Meu Chaveamento</h2>
+          <div class="view-actions">
+            <button class="btn btn-primary btn-sm" onclick="saveBracket()">
+              Salvar chaveamento
+            </button>
+          </div>
+        </div>
+        <button class="btn btn-primary btn-sm" onclick="setView('meus-palpites', this)">Voltar</button>
+        <div id="meu-chaveamento-content"></div>
       </div>
 
       <!-- VIEW: COMPARAR -->
       <div id="view-comparar" class="view">
         <div class="view-header">
-          <h2>Comparar Palpites</h2>
+          <h2>Comparar Classificação</h2>
         </div>
         <div id="compare-content"></div>
+      </div>
+
+      <!-- VIEW: CLASSIFICAÇÃO -->
+      <div id="view-classificacao" class="view">
+        <div class="view-header">
+          <h2>Classificação Oficial</h2>
+        </div>
+        <div id="classificacao-content" class="groups-grid"></div>
       </div>
 
       <!-- VIEW: CHAVEAMENTO -->
