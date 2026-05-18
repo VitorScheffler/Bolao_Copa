@@ -127,3 +127,62 @@ function countFilled(palpites) {
   }
   return { filled, total };
 }
+
+// ── CHAVEAMENTO ──────────────────────────────────────────────────────────
+
+// Os 16 jogos do Round of 32, conforme regulamento FIFA
+// type: 'fixed' = calculável dos palpites | 'terceiro' = depende dos 3ºs classificados
+const CHAVEAMENTO_TEMPLATE = [
+  { id: 73, label: 'Jogo 1',  type: 'fixed',    home: { grupo: 'A', pos: 2 }, away: { grupo: 'B', pos: 2 } },
+  { id: 74, label: 'Jogo 2',  type: 'terceiro', home: { grupo: 'E', pos: 1 }, away: { placeholder: '3º A/B/C/D/F' } },
+  { id: 75, label: 'Jogo 3',  type: 'fixed',    home: { grupo: 'F', pos: 1 }, away: { grupo: 'C', pos: 2 } },
+  { id: 76, label: 'Jogo 4',  type: 'fixed',    home: { grupo: 'C', pos: 1 }, away: { grupo: 'F', pos: 2 } },
+  { id: 77, label: 'Jogo 5',  type: 'terceiro', home: { grupo: 'I', pos: 1 }, away: { placeholder: '3º C/D/F/G/H' } },
+  { id: 78, label: 'Jogo 6',  type: 'fixed',    home: { grupo: 'E', pos: 2 }, away: { grupo: 'I', pos: 2 } },
+  { id: 79, label: 'Jogo 7',  type: 'terceiro', home: { grupo: 'A', pos: 1 }, away: { placeholder: '3º C/E/F/H/I' } },
+  { id: 80, label: 'Jogo 8',  type: 'terceiro', home: { grupo: 'L', pos: 1 }, away: { placeholder: '3º E/H/I/J/K' } },
+  { id: 81, label: 'Jogo 9',  type: 'terceiro', home: { grupo: 'D', pos: 1 }, away: { placeholder: '3º B/E/F/I/J' } },
+  { id: 82, label: 'Jogo 10', type: 'terceiro', home: { grupo: 'G', pos: 1 }, away: { placeholder: '3º A/E/H/I/J' } },
+  { id: 83, label: 'Jogo 11', type: 'fixed',    home: { grupo: 'K', pos: 2 }, away: { grupo: 'L', pos: 2 } },
+  { id: 84, label: 'Jogo 12', type: 'fixed',    home: { grupo: 'H', pos: 1 }, away: { grupo: 'J', pos: 2 } },
+  { id: 85, label: 'Jogo 13', type: 'terceiro', home: { grupo: 'B', pos: 1 }, away: { placeholder: '3º E/F/G/I/J' } },
+  { id: 86, label: 'Jogo 14', type: 'fixed',    home: { grupo: 'J', pos: 1 }, away: { grupo: 'H', pos: 2 } },
+  { id: 87, label: 'Jogo 15', type: 'terceiro', home: { grupo: 'K', pos: 1 }, away: { placeholder: '3º D/E/I/J/L' } },
+  { id: 88, label: 'Jogo 16', type: 'fixed',    home: { grupo: 'D', pos: 2 }, away: { grupo: 'G', pos: 2 } },
+];
+
+// Resolve os times de cada jogo baseado nos palpites do usuário OFICIAL
+// Para os 3ºs, usa o valor editado manualmente (awayOverride)
+function resolveChaveamento(palpitesOficial, chaveamentoSalvas) {
+  // Monta classificados do OFICIAL
+  const classificados = {};
+  for (const [g, data] of Object.entries(GROUPS)) {
+    const standings = calcStandings(palpitesOficial[g], data.teams);
+    classificados[g] = standings.map(t => t.name);
+  }
+
+  return CHAVEAMENTO_TEMPLATE.map((template, i) => {
+    const salvo = chaveamentoSalvas?.[i] || {};
+
+    const homeTime = classificados[template.home.grupo]?.[template.home.pos - 1] || `${template.home.pos}º ${template.home.grupo}`;
+
+    let awayTime;
+    if (template.type === 'fixed') {
+      awayTime = classificados[template.away.grupo]?.[template.away.pos - 1] || `${template.away.pos}º ${template.away.grupo}`;
+    } else {
+      // Para 3ºs: usa o valor salvo (editável pelo OFICIAL) ou o placeholder
+      awayTime = salvo.awayOverride || template.away.placeholder;
+    }
+
+    return {
+      id: template.id,
+      label: template.label,
+      type: template.type,
+      home: homeTime,
+      away: awayTime,
+      awayOverride: salvo.awayOverride || '',
+      homeGoals: salvo.homeGoals ?? '',
+      awayGoals: salvo.awayGoals ?? '',
+    };
+  });
+}

@@ -994,3 +994,94 @@ input[type=number]::-webkit-inner-spin-button { -webkit-appearance: none; }
   font-size: 9px;
   margin-top: 6px;
 }
+
+/* ── CONTAGEM REGRESSIVA ── */
+.contagem {
+  display: flex;
+  gap: 12px;
+  justify-content: center;
+}
+
+.contagem-item {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-lg);
+  padding: 12px 18px;
+  min-width: 64px;
+  box-shadow: var(--shadow);
+}
+
+.contagem-item span {
+  font-size: 28px;
+  font-weight: 700;
+  letter-spacing: -1px;
+  color: var(--blue);
+  font-variant-numeric: tabular-nums;
+}
+
+.contagem-item small {
+  font-size: 11px;
+  color: var(--text-muted);
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  margin-top: 2px;
+}
+
+.bracket {
+  display: flex;
+  gap: 40px;
+  overflow-x: auto;
+  padding: 20px;
+  min-height: 800px;
+}
+
+.round {
+  display: flex;
+  flex-direction: column;
+  justify-content: space-around;
+  min-width: 220px;
+}
+
+.round-title {
+  text-align: center;
+  font-weight: bold;
+  margin-bottom: 20px;
+  font-size: 18px;
+}
+
+.match-card {
+  background: var(--bg-card);
+  border: 1px solid var(--border-md);
+  border-radius: 12px;
+  padding: 12px;
+  margin: 20px 0;
+  min-width: 220px;
+  box-shadow: 0 2px 8px rgba(0,0,0,.15);
+}
+
+.team-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  margin: 6px 0;
+}
+
+.team-row span {
+  font-size: 13px;
+  font-weight: 600;
+  flex: 1;
+}
+
+.team-row input {
+  width: 50px;
+  height: 32px;
+  border-radius: 8px;
+  border: 1px solid var(--border-md);
+  background: var(--bg-input);
+  color: var(--text);
+  text-align: center;
+}

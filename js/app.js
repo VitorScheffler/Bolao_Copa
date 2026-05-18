@@ -135,6 +135,7 @@ function setView(name, btn) {
   document.getElementById('view-' + name).classList.add('active');
 
   if (name === 'comparar') renderCompare();
+  if (name === 'chaveamento')  renderChaveamento();
 }
 
 // ── RENDER: LOGIN ─────────────────────────────────────────────────────────────
@@ -495,6 +496,89 @@ function renderCompare() {
   });
 }
 
+function renderChaveamento() {
+  loadFromServer().then(() => {
+    const user = allUsers[currentUser];
+    const oficial = allUsers['OFICIAL'];
+
+    if (!oficial) {
+      document.getElementById('chaveamento-content').innerHTML = `
+        <div class="empty-state">
+          <p>Os resultados ainda não foram inseridos.</p>
+        </div>
+      `;
+      return;
+    }
+
+    const jogos = resolveChaveamento(
+      oficial.palpites,
+      user.chaveamento
+    );
+
+    if (!user.chaveamento) {
+      user.chaveamento = jogos;
+    }
+
+    const fases = {
+      '16avos': jogos.slice(0, 16),
+      'oitavas': jogos.slice(16, 24),
+      'quartas': jogos.slice(24, 28),
+      'semi': jogos.slice(28, 30),
+      'final': jogos.slice(30, 31)
+    };
+
+    let html = `
+      <div class="bracket">
+    `;
+
+    Object.entries(fases).forEach(([fase, partidas]) => {
+
+      html += `
+        <div class="round">
+          <div class="round-title">${fase.toUpperCase()}</div>
+      `;
+
+      partidas.forEach((jogo, i) => {
+
+        const index = jogos.indexOf(jogo);
+
+        html += `
+          <div class="match-card">
+
+            <div class="team-row">
+              <span>${escHtml(jogo.home)}</span>
+
+              <input
+                type="number"
+                value="${jogo.homeGoals || ''}"
+                onchange="updateChaveamentoScore(${index}, 'home', this.value)"
+              >
+            </div>
+
+            <div class="team-row">
+              <span>${escHtml(jogo.away)}</span>
+
+              <input
+                type="number"
+                value="${jogo.awayGoals || ''}"
+                onchange="updateChaveamentoScore(${index}, 'away', this.value)"
+              >
+            </div>
+
+          </div>
+        `;
+      });
+
+      html += `</div>`;
+    });
+
+    html += `</div>`;
+
+    document.getElementById('chaveamento-content').innerHTML = html;
+
+    user.chaveamento = jogos;
+  });
+}
 // ── UTILS ─────────────────────────────────────────────────────────────────────
 
 function escHtml(str) {
