@@ -85,43 +85,61 @@ function renderLoginUsers() {
     <div class="user-list">${chips}</div>`;
 }
 
-// ── MODAL: CONTAGEM REGRESSIVA ────────────────────────────────────────────────
-
 function showCountdownModal() {
-  const diff = CUP_START - new Date();
-  if (diff <= 0) return;
-
-  const days    = Math.floor(diff / 86_400_000);
-  const hours   = Math.floor((diff % 86_400_000) / 3_600_000);
-  const minutes = Math.floor((diff % 3_600_000) / 60_000);
-  const seconds = Math.floor((diff % 60_000) / 1000);
+  const overlay = document.createElement('div');
+  overlay.id = 'countdown-overlay';
 
   const pad = n => String(n).padStart(2, '0');
 
-  const overlay = document.createElement('div');
-  overlay.id = 'countdown-overlay';
   overlay.innerHTML = `
     <div class="cd-modal">
       <div class="contagem">
-        <div class="contagem-item"><span>${days}</span><small>Dias</small></div>
-        <div class="contagem-item"><span>${pad(hours)}</span><small>Horas</small></div>
-        <div class="contagem-item"><span>${pad(minutes)}</span><small>Min</small></div>
-        <div class="contagem-item"><span>${pad(seconds)}</span><small>Seg</small></div>
+        <div class="contagem-item"><span id="m-dias">--</span><small>Dias</small></div>
+        <div class="contagem-item"><span id="m-horas">--</span><small>Horas</small></div>
+        <div class="contagem-item"><span id="m-min">--</span><small>Min</small></div>
+        <div class="contagem-item"><span id="m-seg">--</span><small>Seg</small></div>
       </div>
-      <h2 class="cd-title">A Copa está chegando! ⚽</h2>
+
+      <h2 class="cd-title">A Copa está chegando!</h2>
+
       <p class="cd-sub">
-        Faltam <strong>${days} dia${days !== 1 ? 's' : ''}</strong> para o primeiro jogo.<br>
-        Não deixe para a última hora!
+        Faltam <strong id="m-text">--</strong> para o primeiro jogo.
       </p>
-      <div class="cd-warn">
+
+       <div class="cd-warn">
         ⚠️ Participantes sem palpites completos serão
         <strong>desclassificados</strong> do bolão.
         Preencha todos os 72 jogos antes de 11/06/2026.
       </div>
+
       <button class="btn btn-primary btn-full"
         onclick="document.getElementById('countdown-overlay').remove()">
         Entendido, vou preencher!
       </button>
-    </div>`;
+    </div>
+  `;
+
   document.body.appendChild(overlay);
+
+  function update() {
+    const t = window.getCupCountdown();
+    if (!t) return;
+
+    document.getElementById('m-dias').textContent = t.dias;
+    document.getElementById('m-horas').textContent = pad(t.horas);
+    document.getElementById('m-min').textContent = pad(t.min);
+    document.getElementById('m-seg').textContent = pad(t.seg);
+
+    document.getElementById('m-text').innerHTML =
+      `${t.dias} dia${t.dias !== 1 ? 's' : ''}`;
+  }
+
+  update();
+  const interval = setInterval(update, 1000);
+
+  // limpa o intervalo quando fechar modal
+  overlay.querySelector('button').addEventListener('click', () => {
+    clearInterval(interval);
+    overlay.remove();
+  });
 }

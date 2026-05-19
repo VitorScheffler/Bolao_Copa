@@ -878,3 +878,167 @@ input[type=number]::-webkit-inner-spin-button { -webkit-appearance: none; }
   }
 
 }
+/* =========================
+   LISTA DE JOGOS
+========================= */
+
+.jogos-list {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  margin-top: 20px;
+}
+
+/* =========================
+   CARD DO JOGO
+========================= */
+
+.jogo-card {
+  display: flex;
+  flex-direction: column;
+
+  padding: 16px;
+  border-radius: 14px;
+  background: #1a1b1e;
+
+  position: relative; /* IMPORTANTE */
+  cursor: pointer;
+  transition: 0.2s;
+}
+
+.jogo-card:hover {
+  transform: translateY(-2px);
+  background: #22242a;
+}
+
+/* Tag (Grupo A, etc) */
+.tag {
+  font-size: 11px;
+  background: #2a2d35;
+  padding: 4px 8px;
+  border-radius: 8px;
+  width: fit-content;
+  color: #aaa;
+}
+
+/* =========================
+   TIMES (LADO A LADO)
+========================= */
+
+.jogo-center {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 14px;
+
+  margin-top: 12px;
+}
+
+.team {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+
+  font-weight: 600;
+  font-size: 14px;
+}
+
+.flag-img {
+  width: 26px;
+  height: 26px;
+  object-fit: contain;
+}
+
+.vs {
+  font-weight: bold;
+  opacity: 0.5;
+}
+
+/* =========================
+   FOOTER DO CARD
+========================= */
+
+.jogo-bottom {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+
+  margin-top: 12px;
+  font-size: 13px;
+  color: #aaa;
+}
+
+/* ícone play */
+
+
+.play {
+  position: absolute;
+  right: 16px;
+  top: 50%;
+  transform: translateY(-50%);
+
+  width: 34px;
+  height: 34px;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  color: #00ff88;
+  font-size: 20px;
+
+  transition: 0.2s;
+}
+
+.play:hover {
+  transform: translateY(-50%) scale(1.1);
+}
+
+/* =========================
+   FASES
+========================= */
+
+.fase-section {
+  margin-bottom: 28px;
+}
+
+.fase-title {
+  font-size: 14px;
+  color: #bbb;
+  margin: 10px 0;
+  padding-left: 4px;
+  letter-spacing: 1px;
+}
+
+.fase-card {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+
+  padding: 12px;
+  border-radius: 14px;
+
+  background: #15161a;
+}
+
+/* =========================
+   AÇÕES / BOTÕES
+========================= */
+
+.view-actions {
+  display: flex;
+  justify-content: flex-end;
+  align-items: center;
+  gap: 12px;
+
+  margin-top: 12px;
+}
+
+.calendar-nav {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 12px;
+
+  margin-top: 12px;
+}
