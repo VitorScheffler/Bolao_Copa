@@ -15,7 +15,6 @@
     <div class="login-wrap">
       <div class="login-logo">
         <h1>Bolão Copa do Mundo</h1>
-        <p>Fase de grupos · 12 grupos · 72 jogos</p>
       </div>
 
       <div class="contagem">
@@ -104,11 +103,17 @@
 
     <header class="main-header">
       <div class="header-left">
-        <span class="app-title">Bolão Copa do Mundo</span>
+        <spam class="app-title" onclick="goToHomeView()" class="logo-title">Bolão Copa do Mundo</spam>
       </div>
       <div class="header-center">
         <nav class="main-nav">
-          <button class="nav-btn active" data-view="meus-palpites" onclick="setView('meus-palpites', this)">Meus Palpites</button>
+          <div class="nav-dropdown">
+            <button class="nav-btn active dropdown-toggle" onclick="togglePalpitesMenu(this)">Meus Palpites</button>
+            <div class="dropdown-menu">
+              <button class="dropdown-item" data-view="minha-classificacao" onclick="selectPalpiteView('minha-classificacao', this)">Classificação</button>
+              <button class="dropdown-item" data-view="meu-chaveamento" onclick="selectPalpiteView('meu-chaveamento', this)">Chaveamento</button>
+            </div>
+          </div>
           <button class="nav-btn" data-view="comparar" onclick="setView('comparar', this)">Comparar Classificação</button>
           <button class="nav-btn" data-view="classificacao" onclick="setView('classificacao', this)">Classificação Oficial</button>
           <button class="nav-btn" data-view="chaveamento" onclick="setView('chaveamento', this)">Chaveamento Oficial</button>
@@ -129,9 +134,94 @@
           <h2>Meus Palpites</h2>
           <div class="view-actions"></div>
         </div>
-        <div class="view-shortcuts">
-          <button class="btn btn-primary btn-sm" data-view="minha-classificacao" onclick="setView('minha-classificacao', this)">Minha Classificação</button>
-          <button class="btn btn-primary btn-sm" data-view="meu-chaveamento" onclick="setView('meu-chaveamento', this)">Meu Chaveamento</button>
+
+        <div class="palpites-grid">
+
+          <!-- MINHA CLASSIFICAÇÃO -->
+          <div 
+            class="palpite-card"
+            onclick="setView('minha-classificacao', this)"
+          >
+            <div class="palpite-icon">🏆</div>
+
+            <div class="palpite-content">
+              <h3>Minha Classificação</h3>
+              <p>
+                Veja e edite seus palpites da fase de grupos.
+              </p>
+            </div>
+
+            <div class="palpite-arrow">→</div>
+          </div>
+
+          <!-- MEU CHAVEAMENTO -->
+          <div 
+            class="palpite-card"
+            onclick="setView('meu-chaveamento', this)"
+          >
+            <div class="palpite-icon">⚔️</div>
+
+            <div class="palpite-content">
+              <h3>Meu Chaveamento</h3>
+              <p>
+                Monte o mata-mata completo até a final.
+              </p>
+            </div>
+
+            <div class="palpite-arrow">→</div>
+          </div>
+
+          <!-- COMPARAR -->
+          <div 
+            class="palpite-card"
+            onclick="setView('comparar', this)"
+          >
+            <div class="palpite-icon">📊</div>
+
+            <div class="palpite-content">
+              <h3>Comparar Classificação</h3>
+              <p>
+                Compare seus palpites com os oficiais.
+              </p>
+            </div>
+
+            <div class="palpite-arrow">→</div>
+          </div>
+
+          <!-- CLASSIFICAÇÃO OFICIAL -->
+          <div 
+            class="palpite-card"
+            onclick="setView('classificacao', this)"
+          >
+            <div class="palpite-icon">🌍</div>
+
+            <div class="palpite-content">
+              <h3>Classificação Oficial</h3>
+              <p>
+                Veja a classificação atual da Copa.
+              </p>
+            </div>
+
+            <div class="palpite-arrow">→</div>
+          </div>
+
+          <!-- CHAVEAMENTO OFICIAL -->
+          <div 
+            class="palpite-card"
+            onclick="setView('chaveamento', this)"
+          >
+            <div class="palpite-icon">🏟️</div>
+
+            <div class="palpite-content">
+              <h3>Chaveamento Oficial</h3>
+              <p>
+                Acompanhe o mata-mata oficial do torneio.
+              </p>
+            </div>
+
+            <div class="palpite-arrow">→</div>
+          </div>
+
         </div>
       </div>
 

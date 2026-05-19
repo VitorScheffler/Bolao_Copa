@@ -38,7 +38,6 @@ if (json_last_error() !== JSON_ERROR_NONE) {
     exit;
 }
 
-// Espera { "userName": "...", "userData": { palpites: {...} } }
 if (!isset($incoming['userName']) || !isset($incoming['userData'])) {
     http_response_code(400);
     echo json_encode(['error' => 'Missing userName or userData']);
@@ -48,7 +47,8 @@ if (!isset($incoming['userName']) || !isset($incoming['userData'])) {
 $userName = $incoming['userName'];
 $userData = $incoming['userData'];
 
-// Abre com lock exclusivo para leitura + escrita segura
+/* ---------------- FILE LOCK ---------------- */
+
 $fp = fopen($dataFile, 'c+');
 if (!$fp) {
     http_response_code(500);
@@ -63,34 +63,46 @@ if (!flock($fp, LOCK_EX)) {
     exit;
 }
 
-// Lê o estado atual do arquivo (com o lock já adquirido)
-$content = '';
-rewind($fp);
-while (!feof($fp)) {
-    $content .= fread($fp, 8192);
-}
+/* ---------------- READ CURRENT DATA ---------------- */
 
-$current = [];
-if ($content !== '') {
+rewind($fp);
+$content = stream_get_contents($fp);
+
+$current = [
+    'users' => [],
+    'jogos' => []
+];
+
+if (!empty($content)) {
     $parsed = json_decode($content, true);
-    if (json_last_error() === JSON_ERROR_NONE && isset($parsed['users'])) {
-        $current = $parsed['users'];
+
+    if (json_last_error() === JSON_ERROR_NONE && is_array($parsed)) {
+        $current['users'] = $parsed['users'] ?? [];
+        $current['jogos'] = $parsed['jogos'] ?? [];
     }
 }
 
-// Merge: atualiza apenas o usuário que salvou, preserva os demais
-$current[$userName] = $userData;
+/* ---------------- UPDATE USER ---------------- */
 
-$newContent = json_encode(
-    ['users' => $current],
-    JSON_UNESCAPED_UNICODE | JSON_PRETTY_PRINT
-);
+$current['users'][$userName] = $userData;
+
+/* ---------------- SAVE BACK ---------------- */
 
 ftruncate($fp, 0);
 rewind($fp);
-fwrite($fp, $newContent);
+
+fwrite(
+    $fp,
+    json_encode($current, JSON_UNESCAPED_UNICODE | JSON_PRETTY_PRINT)
+);
+
 fflush($fp);
 flock($fp, LOCK_UN);
 fclose($fp);
 
-echo json_encode(['ok' => true, 'users' => count($current)]);
+/* ---------------- RESPONSE ---------------- */
+
+echo json_encode([
+    'ok' => true,
+    'users' => count($current['users'])
+]);

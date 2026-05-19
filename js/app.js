@@ -1209,3 +1209,47 @@ function showToast(msg) {
   t.classList.add('show');
   setTimeout(() => t.classList.remove('show'), 2500);
 }
+
+function togglePalpitesMenu(button) {
+  const dropdown = button.parentElement;
+
+  document.querySelectorAll('.nav-dropdown').forEach(el => {
+    if (el !== dropdown) {
+      el.classList.remove('open');
+    }
+  });
+
+  dropdown.classList.toggle('open');
+}
+
+document.addEventListener('click', (e) => {
+  if (!e.target.closest('.nav-dropdown')) {
+    document.querySelectorAll('.nav-dropdown').forEach(el => {
+      el.classList.remove('open');
+    });
+  }
+});
+
+function selectPalpiteView(view, element) {
+  setView(view, element);
+
+  document.querySelectorAll('.nav-dropdown').forEach(el => {
+    el.classList.remove('open');
+  });
+}
+
+function goToHomeView() {
+  setView('meus-palpites');
+
+  document.querySelectorAll('.nav-btn').forEach(btn => {
+    btn.classList.remove('active');
+
+    if (btn.dataset.view === 'meus-palpites') {
+      btn.classList.add('active');
+    }
+  });
+
+  document.querySelectorAll('.nav-dropdown').forEach(el => {
+    el.classList.remove('open');
+  });
+}
