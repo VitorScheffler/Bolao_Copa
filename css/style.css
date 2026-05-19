@@ -433,209 +433,181 @@ input[type=number]::-webkit-inner-spin-button { -webkit-appearance: none; }
 .bracket-toolbar {
   display: flex; align-items: center; justify-content: space-between;
   flex-wrap: wrap; gap: 10px;
-  margin-bottom: 1rem;
+  margin-bottom: 1.5rem;
 }
 .bracket-legend { display: flex; gap: 14px; flex-wrap: wrap; }
 .bl-item  { display: flex; align-items: center; gap: 6px; font-size: 12px; color: var(--text-muted); }
 .bl-dot   { width: 10px; height: 10px; border-radius: 3px; flex-shrink: 0; }
 
-/* ── Outer scroll container ── */
-.bracket-outer {
-  width: 100%;
-  overflow-x: auto;
-  overflow-y: hidden;
-  padding-bottom: 20px;
-  /* custom scrollbar */
-}
-.bracket-outer::-webkit-scrollbar       { height: 8px; }
-.bracket-outer::-webkit-scrollbar-track { background: transparent; }
-.bracket-outer::-webkit-scrollbar-thumb { background: var(--border-md); border-radius: 99px; }
+/* ═══════════════════════════════════════════════════════════
+   BRACKET VERTICAL — layout por fase empilhado
+   ═══════════════════════════════════════════════════════════ */
 
-/* ── Inner scroll ── */
-.bracket-scroll {
+/* ── Bloco de fase ── */
+.bv-phase {
+  margin-bottom: 2rem;
+}
+
+.bv-phase-header {
+  display: flex; align-items: center; gap: 12px;
+  margin-bottom: 1rem;
+}
+
+.bv-phase-label {
+  font-size: 12px; font-weight: 700;
+  text-transform: uppercase; letter-spacing: .1em;
+  color: var(--text-muted); white-space: nowrap;
+}
+
+.bv-phase-label--final {
+  color: var(--amber);
+}
+
+.bv-phase-line {
+  flex: 1; height: 2px;
+  background: var(--border);
+  border-radius: 2px;
+}
+
+/* ── Grid de jogos dentro da fase ── */
+/* --bv-cols é setado inline pelo JS (4 para 16avos/oitavas/quartas, 2 para semi) */
+.bv-grid {
+  display: grid;
+  grid-template-columns: repeat(var(--bv-cols, 4), 1fr);
+  gap: 10px;
+}
+
+/* ── Slot (label + card) ── */
+.bv-slot {
   display: flex;
   flex-direction: column;
-  min-width: max-content;
-  padding: 0 24px 24px;
+  gap: 4px;
 }
 
-/* ── Phase strip (labels acima das colunas) ── */
-.bracket-phase-strip {
-  display: flex;
-  align-items: stretch;
-  margin-bottom: 8px;
-}
-.bps-item {
-  width: 190px; flex-shrink: 0;
-  text-align: center;
-  font-size: 10px; font-weight: 700;
-  text-transform: uppercase; letter-spacing: .12em;
+.bv-slot-label {
+  font-size: 9px; font-weight: 700;
   color: var(--text-faint);
-  padding: 6px 0;
-  border-bottom: 2px solid var(--border);
-}
-.bps-center { width: 180px; color: var(--amber); border-bottom-color: var(--amber); }
-.bps-sep    { width: 32px; flex-shrink: 0; }
-
-/* ── Bracket body ── */
-.bracket-body {
-  display: flex;
-  align-items: center;
-  gap: 0;
+  text-transform: uppercase; letter-spacing: .08em;
+  text-align: center;
 }
 
-/* ── Cada lado (esquerdo/direito) ── */
-.bracket-side {
-  display: flex;
-  align-items: stretch;
-}
-
-/* ── Coluna de fase ── */
-.bracket-col {
-  display: flex;
-  flex-direction: column;
-  justify-content: space-around;
-  width: 190px;
-  flex-shrink: 0;
-  gap: 0;
-}
-
-/* ── Slot de jogo ── */
-.b-slot {
-  display: flex;
-  flex-direction: column;
-  align-items: stretch;
-  flex: 1;
-  /* padding vertical garante espaço para os conectores ficarem centralizados */
-  padding: 6px 0;
-}
-
-/* ── Label do jogo ── */
-.b-match-label {
-  font-size: 9px; font-weight: 600;
-  color: var(--text-faint); text-transform: uppercase;
-  letter-spacing: .06em; text-align: center;
-  margin-bottom: 3px;
-}
-
-/* ── Card ── */
-.b-card {
+/* ── Card de jogo ── */
+.bv-card {
   background: var(--bg-card);
   border: 1px solid var(--border-md);
   border-radius: 10px; overflow: hidden;
   box-shadow: var(--shadow);
   transition: border-color .2s, box-shadow .2s;
 }
-.b-card:hover { border-color: var(--blue); box-shadow: var(--shadow-md); }
-.b-card.pending { opacity: .5; border-style: dashed; }
+.bv-card:hover  { border-color: var(--blue); box-shadow: var(--shadow-md); }
+.bv-card.pending { opacity: .5; border-style: dashed; }
 
 /* ── Linha de time ── */
-.b-team {
-  display: flex; align-items: center; gap: 6px;
-  padding: 6px 8px;
+.bv-team {
+  display: flex; align-items: center; gap: 8px;
+  padding: 8px 10px;
   border-bottom: 1px solid var(--border);
   transition: background .15s;
+  min-width: 0; /* permite truncar dentro do flex */
 }
-.b-team:last-child { border-bottom: none; }
-.b-team.winner { background: var(--green-bg); }
-.b-team.winner .b-team-name { color: var(--green-text); font-weight: 700; }
+.bv-team:last-child { border-bottom: none; }
+.bv-team.winner { background: var(--green-bg); }
+.bv-team.winner .bv-name { color: var(--green-text); font-weight: 700; }
 
-.b-flag      { font-size: 14px; width: 18px; text-align: center; flex-shrink: 0; }
-.b-team-name { flex: 1; font-size: 11px; font-weight: 500; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 96px; }
-.b-team-name.tbd { color: var(--text-faint); font-style: italic; font-weight: 400; }
+/* Bandeira — tamanho generoso, sem truncar */
+.bv-flag {
+  font-size: 18px;
+  width: 24px; text-align: center;
+  flex-shrink: 0; line-height: 1;
+}
 
-/* ── Input de score no bracket ── */
-.b-score {
-  width: 28px; height: 22px; text-align: center;
-  font-size: 12px; font-weight: 700; font-family: inherit;
+/* Nome completo — cresce, trunca com ellipsis apenas se necessário */
+.bv-name {
+  flex: 1;
+  font-size: 12px; font-weight: 500;
+  white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+  min-width: 0;
+}
+.bv-name.tbd { color: var(--text-faint); font-style: italic; font-weight: 400; }
+
+/* ── Score input ── */
+.bv-score {
+  width: 30px; height: 24px; text-align: center;
+  font-size: 13px; font-weight: 700; font-family: inherit;
   border: 1px solid var(--border-md); border-radius: 5px;
   background: var(--bg-input); color: var(--text);
   outline: none; flex-shrink: 0;
   transition: border-color .15s, background .15s;
   -moz-appearance: textfield; appearance: textfield;
 }
-.b-score::-webkit-outer-spin-button,
-.b-score::-webkit-inner-spin-button { -webkit-appearance: none; }
-.b-score:focus   { border-color: var(--blue); background: var(--bg-card); }
-.b-score:disabled { opacity: .45; cursor: not-allowed; }
+.bv-score::-webkit-outer-spin-button,
+.bv-score::-webkit-inner-spin-button { -webkit-appearance: none; }
+.bv-score:focus    { border-color: var(--blue); background: var(--bg-card); }
+.bv-score:disabled { opacity: .4; cursor: not-allowed; }
 
 /* ── Override 3º classificado ── */
-.b-team-override {
-  flex: 1; font-size: 10px; font-weight: 400;
-  border: 1px solid var(--amber); border-radius: 4px;
+.bv-override {
+  flex: 1; min-width: 0;
+  font-size: 11px; font-weight: 400; font-family: inherit;
+  border: 1px solid var(--amber); border-radius: 5px;
   background: var(--amber-bg); color: var(--amber-text);
-  padding: 2px 4px; outline: none;
-  max-width: 100px;
+  padding: 2px 6px; outline: none;
 }
-.b-team-override:focus { border-color: var(--blue); background: var(--bg-card); color: var(--text); }
+.bv-override:focus { border-color: var(--blue); background: var(--bg-card); color: var(--text); }
 
-/* ── Coluna de conectores ── */
-.bracket-connector-col {
-  width: 32px; flex-shrink: 0;
-  display: flex; flex-direction: column;
-  align-self: stretch;
-}
-.bc-pair {
-  flex: 1; display: flex;
-  align-items: stretch;
-}
-.bc-pair svg {
-  width: 32px;
-  display: block;
-  /* height 100% vem do flexbox */
-  flex: 1;
-}
-
-/* ── Centro ── */
-.bracket-center {
+/* ── Final ── */
+.bv-final-wrap {
   display: flex;
-  align-items: center;
   justify-content: center;
-  flex-shrink: 0;
-  width: 180px;
-}
-.bracket-center-inner {
-  display: flex; flex-direction: column;
-  align-items: center; gap: 16px;
-  width: 100%;
 }
 
-.b-trophy-wrap {
-  display: flex; flex-direction: column;
-  align-items: center; gap: 6px;
+.bv-final-inner {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 20px;
+  width: 100%;
+  max-width: 420px;
 }
-.b-trophy-icon {
-  font-size: 44px;
+
+/* Troféu */
+.bv-trophy {
+  display: flex; flex-direction: column;
+  align-items: center; gap: 8px;
+}
+.bv-trophy-icon {
+  font-size: 52px;
   filter: drop-shadow(0 2px 12px rgba(245,158,11,.6));
   animation: trophyPulse 2s ease-in-out infinite;
 }
 @keyframes trophyPulse {
   0%,100% { transform: scale(1);    filter: drop-shadow(0 2px 8px  rgba(245,158,11,.4)); }
-  50%     { transform: scale(1.07); filter: drop-shadow(0 4px 16px rgba(245,158,11,.8)); }
+  50%     { transform: scale(1.07); filter: drop-shadow(0 4px 18px rgba(245,158,11,.8)); }
 }
-.b-champion {
-  display: flex; flex-direction: column;
-  align-items: center; gap: 2px;
+.bv-champion {
+  display: flex; flex-direction: column; align-items: center; gap: 2px;
 }
-.b-champion-flag        { font-size: 22px; }
-.b-champion-name        { font-size: 12px; font-weight: 700; color: var(--amber); text-align: center; max-width: 120px; word-break: break-word; }
-.b-champion-placeholder { font-size: 11px; color: var(--text-faint); font-style: italic; }
+.bv-champion-flag { font-size: 28px; }
+.bv-champion-name { font-size: 15px; font-weight: 800; color: var(--amber); letter-spacing: -.3px; }
+.bv-champion-tbd  { font-size: 12px; color: var(--text-faint); font-style: italic; }
 
-/* ── Final card (centro) ── */
-.b-final-card {
-  background: var(--bg-card);
-  border: 2px solid var(--amber);
-  border-radius: 12px; overflow: hidden;
-  box-shadow: 0 0 0 4px var(--amber-bg), var(--shadow-md);
+/* Card especial da final */
+.bv-card--final {
   width: 100%;
+  border: 2px solid var(--amber) !important;
+  box-shadow: 0 0 0 4px var(--amber-bg), var(--shadow-md) !important;
 }
-.b-final-label {
-  text-align: center; font-size: 9px; font-weight: 800;
+.bv-final-badge {
+  text-align: center; font-size: 10px; font-weight: 800;
   letter-spacing: .15em; text-transform: uppercase;
-  color: var(--amber); padding: 4px 0;
+  color: var(--amber); padding: 5px 0;
   background: var(--amber-bg);
   border-bottom: 1px solid var(--amber);
 }
+.bv-team--final { padding: 10px 14px; }
+.bv-flag--final { font-size: 22px; width: 28px; }
+.bv-name--final { font-size: 14px; font-weight: 600; }
+.bv-score--final { width: 34px; height: 28px; font-size: 15px; }
 
 /* ═══════════════════════════════════════════════════════════
    RESPONSIVE
@@ -649,21 +621,63 @@ input[type=number]::-webkit-inner-spin-button { -webkit-appearance: none; }
   .main-nav .nav-btn { padding: 6px 10px; font-size: 12px; }
   .contagem-item { min-width: 60px; padding: 10px 12px; }
   .contagem-item span { font-size: 22px; }
-  /* Bracket: menor em mobile, scroll horizontal */
-  .bracket-col { width: 150px; }
-  .bps-item    { width: 150px; }
-  .bps-center  { width: 150px; }
-  .b-team-name { max-width: 72px; }
+  /* Bracket vertical: 2 colunas em mobile (em vez de 4) */
+  .bv-grid { grid-template-columns: repeat(2, 1fr) !important; }
+  .bv-name { font-size: 11px; }
 }
 
-.logo-title {
+.nav-dropdown {
+  position: relative;
+  display: inline-block;
+}
+
+.dropdown-toggle {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.dropdown-menu {
+  position: absolute;
+  top: calc(100% + 8px);
+  left: 0;
+
+  display: none;
+  flex-direction: column;
+  gap: 6px;
+
+  min-width: 180px;
+  padding: 8px;
+
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+
+  box-shadow: 0 10px 25px rgba(0,0,0,0.12);
+  z-index: 100;
+}
+
+.nav-dropdown.open .dropdown-menu {
+  display: flex;
+}
+
+.dropdown-item {
+  border: none;
+  background: var(--bg-secondary);
+  color: var(--text);
+
+  padding: 10px 12px;
+  border-radius: 10px;
+
   cursor: pointer;
-  user-select: none;
-  transition: 0.2s ease;
+  text-align: left;
+
+  transition: 0.2s;
 }
 
-.logo-title:hover {
-  opacity: 0.8;
+.dropdown-item:hover {
+  background: var(--primary);
+  color: white;
 }
 
 .palpites-grid {
@@ -734,58 +748,4 @@ input[type=number]::-webkit-inner-spin-button { -webkit-appearance: none; }
 .palpite-card:hover .palpite-arrow {
   transform: translateX(4px);
   opacity: 1;
-}
-
-.nav-dropdown {
-  position: relative;
-  display: inline-block;
-}
-
-.dropdown-toggle {
-  display: flex;
-  align-items: center;
-  gap: 6px;
-}
-
-.dropdown-menu {
-  position: absolute;
-  top: calc(100% + 8px);
-  left: 0;
-
-  display: none;
-  flex-direction: column;
-  gap: 6px;
-
-  min-width: 180px;
-  padding: 8px;
-
-  background: var(--bg-card);
-  border: 1px solid var(--border);
-  border-radius: 12px;
-
-  box-shadow: 0 10px 25px rgba(0,0,0,0.12);
-  z-index: 100;
-}
-
-.nav-dropdown.open .dropdown-menu {
-  display: flex;
-}
-
-.dropdown-item {
-  border: none;
-  background: var(--bg-secondary);
-  color: var(--text);
-
-  padding: 10px 12px;
-  border-radius: 10px;
-
-  cursor: pointer;
-  text-align: left;
-
-  transition: 0.2s;
-}
-
-.dropdown-item:hover {
-  background: var(--primary);
-  color: white;
 }

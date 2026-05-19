@@ -3,108 +3,61 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Bolão Copa do Mundo</title>
+  <title>Bolão Copa do Mundo 2026</title>
   <link rel="stylesheet" href="css/style.css">
 </head>
 <body>
 
 <div class="app">
 
-  <!-- TELA DE LOGIN -->
+  <!-- ══════════════════════════════════
+       TELA DE LOGIN
+       ══════════════════════════════════ -->
   <div id="screen-login" class="screen active">
     <div class="login-wrap">
+
       <div class="login-logo">
         <h1>Bolão Copa do Mundo</h1>
+        <p>Fase de grupos · 12 grupos · 72 jogos</p>
       </div>
 
+      <!-- Contagem regressiva -->
       <div class="contagem">
-        <div class="contagem-item">
-          <span id="contagem-dias">29</span>
-          <small>Dias</small>
-        </div>
-
-        <div class="contagem-item">
-          <span id="contagem-horas">06</span>
-          <small>Horas</small>
-        </div>
-
-        <div class="contagem-item">
-          <span id="contagem-minutos">26</span>
-          <small>Minutos</small>
-        </div>
-
-        <div class="contagem-item">
-          <span id="contagem-segundos">40</span>
-          <small>Segundos</small>
-        </div>
+        <div class="contagem-item"><span id="cd-dias">--</span><small>Dias</small></div>
+        <div class="contagem-item"><span id="cd-horas">--</span><small>Horas</small></div>
+        <div class="contagem-item"><span id="cd-min">--</span><small>Min</small></div>
+        <div class="contagem-item"><span id="cd-seg">--</span><small>Seg</small></div>
       </div>
 
-      <script>
-        // Primeiro jogo da Copa 2026 - 11/06/2026 às 16:00
-        const dataCopa = new Date("2026-06-11T16:00:00").getTime();
-
-        function atualizarContagem() {
-          const agora = new Date().getTime();
-          const diferenca = dataCopa - agora;
-
-          if (diferenca <= 0) {
-            document.getElementById("contagem-dias").innerText = "0";
-            document.getElementById("contagem-horas").innerText = "00";
-            document.getElementById("contagem-minutos").innerText = "00";
-            document.getElementById("contagem-segundos").innerText = "00";
-            return;
-          }
-
-          const dias = Math.floor(diferenca / (1000 * 60 * 60 * 24));
-
-          const horas = Math.floor(
-            (diferenca % (1000 * 60 * 60 * 24)) /
-            (1000 * 60 * 60)
-          );
-
-          const minutos = Math.floor(
-            (diferenca % (1000 * 60 * 60)) /
-            (1000 * 60)
-          );
-
-          const segundos = Math.floor(
-            (diferenca % (1000 * 60)) / 1000
-          );
-
-          document.getElementById("contagem-dias").innerText = dias;
-          document.getElementById("contagem-horas").innerText =
-            String(horas).padStart(2, "0");
-
-          document.getElementById("contagem-minutos").innerText =
-            String(minutos).padStart(2, "0");
-
-          document.getElementById("contagem-segundos").innerText =
-            String(segundos).padStart(2, "0");
-        }
-
-        atualizarContagem();
-        setInterval(atualizarContagem, 1000);
-      </script>
+      <!-- Formulário de login -->
       <div class="login-card">
         <h2>Entrar no bolão</h2>
         <div class="field-group">
           <label>Seu nome</label>
-          <input type="text" id="login-name" placeholder="Digite seu nome..." maxlength="32" autocomplete="off">
+          <input type="text" id="login-name" placeholder="Digite seu nome…"
+            maxlength="32" autocomplete="off">
         </div>
-        <button class="btn btn-primary btn-full" onclick="login()">Entrar</button>
+        <button class="btn btn-primary btn-full" onclick="login()">Entrar →</button>
         <div id="login-error" class="error-msg" style="display:none"></div>
       </div>
-      <div class="login-users" id="login-users-list"></div>
-    </div>
-  </div>
 
-  <!-- TELA PRINCIPAL -->
+      <!-- Participantes existentes -->
+      <div id="login-users-list" class="login-users"></div>
+
+    </div>
+  </div><!-- /screen-login -->
+
+
+  <!-- ══════════════════════════════════
+       TELA PRINCIPAL
+       ══════════════════════════════════ -->
   <div id="screen-main" class="screen">
 
     <header class="main-header">
       <div class="header-left">
-        <spam class="app-title" onclick="goToHomeView()" class="logo-title">Bolão Copa do Mundo</spam>
+        <span class="app-title">Bolão Copa 2026</span>
       </div>
+
       <div class="header-center">
         <nav class="main-nav">
           <div class="nav-dropdown">
@@ -119,16 +72,37 @@
           <button class="nav-btn" data-view="chaveamento" onclick="setView('chaveamento', this)">Chaveamento Oficial</button>
         </nav>
       </div>
+
       <div class="header-right">
         <div class="user-badge" id="user-badge"></div>
-        <button class="theme-toggle" onclick="toggleTheme()" id="theme-btn" title="Alternar modo escuro" aria-label="Alternar modo escuro">🌙</button>
+        <button class="theme-toggle" id="theme-btn"
+          onclick="toggleTheme()" title="Alternar modo escuro">🌙</button>
         <button class="btn btn-ghost btn-sm" onclick="logout()">Sair</button>
       </div>
     </header>
 
     <main class="main-content">
 
-      <!-- VIEW: MEUS PALPITES -->
+      <!-- VIEW: MEUS PALPITES (hub) -->
+      <!-- <div id="view-meus-palpites" class="view active">
+        <div class="view-header">
+          <h2>Meus Palpites</h2>
+        </div>
+        <p style="color:var(--text-muted);margin-bottom:.25rem">
+          Preencha seus palpites para todos os grupos e salve antes de 11/06/2026.
+        </p>
+        <div class="view-shortcuts">
+          <button class="btn btn-primary"
+            onclick="setView('minha-classificacao', this)">
+            📊 Palpitar nos Grupos
+          </button>
+          <button class="btn btn-primary"
+            onclick="setView('meu-chaveamento', this)">
+            🏆 Meu Chaveamento
+          </button>
+        </div>
+      </div> -->
+
       <div id="view-meus-palpites" class="view active">
         <div class="view-header">
           <h2>Meus Palpites</h2>
@@ -231,10 +205,12 @@
           <h2>Minha Classificação</h2>
           <div class="view-actions">
             <span id="progress-label" class="progress-label"></span>
-            <button class="btn btn-primary btn-sm" onclick="saveAll()">Salvar tudo</button>
+            <button class="btn btn-ghost btn-sm"
+              onclick="setView('meus-palpites', this)">← Voltar</button>
+            <button class="btn btn-primary btn-sm"
+              onclick="saveAll()">💾 Salvar tudo</button>
           </div>
         </div>
-        <button class="btn btn-primary btn-sm" onclick="setView('meus-palpites', this)">Voltar</button>
         <div id="groups-grid" class="groups-grid"></div>
       </div>
 
@@ -243,12 +219,10 @@
         <div class="view-header">
           <h2>Meu Chaveamento</h2>
           <div class="view-actions">
-            <button class="btn btn-primary btn-sm" onclick="saveBracket()">
-              Salvar chaveamento
-            </button>
+            <button class="btn btn-ghost btn-sm"
+              onclick="setView('meus-palpites', this)">← Voltar</button>
           </div>
         </div>
-        <button class="btn btn-primary btn-sm" onclick="setView('meus-palpites', this)">Voltar</button>
         <div id="meu-chaveamento-content"></div>
       </div>
 
@@ -260,7 +234,7 @@
         <div id="compare-content"></div>
       </div>
 
-      <!-- VIEW: CLASSIFICAÇÃO -->
+      <!-- VIEW: CLASSIFICAÇÃO OFICIAL -->
       <div id="view-classificacao" class="view">
         <div class="view-header">
           <h2>Classificação Oficial</h2>
@@ -268,22 +242,84 @@
         <div id="classificacao-content" class="groups-grid"></div>
       </div>
 
-      <!-- VIEW: CHAVEAMENTO -->
+      <!-- VIEW: CHAVEAMENTO OFICIAL -->
       <div id="view-chaveamento" class="view">
         <div class="view-header">
-          <h2>Chaveamento</h2>
+          <h2>Chaveamento Oficial</h2>
         </div>
         <div id="chaveamento-content"></div>
       </div>
 
     </main>
-  </div>
+  </div><!-- /screen-main -->
 
-</div>
+</div><!-- /app -->
 
 <div id="toast" class="toast"></div>
 
+<!-- ══════════════════════════════════
+     SCRIPTS — ordem de dependências
+     ══════════════════════════════════ -->
+
+<!-- 1. Dados estáticos -->
 <script src="js/data.js"></script>
+
+<!-- 2. Cálculos puros (depende de data.js) -->
+<script src="js/calc.js"></script>
+
+<!-- 3. Estado global (depende de calc.js) -->
+<script src="js/state.js"></script>
+
+<!-- 4. Utilitários (depende de state.js) -->
+<script src="js/utils.js"></script>
+
+<!-- 5. API (depende de state.js + utils.js) -->
+<script src="js/api.js"></script>
+
+<!-- 6. Autenticação (depende de api.js + utils.js) -->
+<script src="js/auth.js"></script>
+
+<!-- 7. Views (dependem de tudo acima) -->
+<script src="js/views/groups.js"></script>
+<script src="js/views/compare.js"></script>
+<script src="js/views/official.js"></script>
+<script src="js/views/bracket.js"></script>
+
+<!-- 8. Orquestrador (depende de todas as views) -->
 <script src="js/app.js"></script>
+
+<!-- 9. Contagem regressiva inline (independente) -->
+<script>
+  (function () {
+    const TARGET = new Date('2026-06-11T16:00:00').getTime();
+    const ids    = ['cd-dias','cd-horas','cd-min','cd-seg'];
+    const pad    = n => String(n).padStart(2,'0');
+
+    function tick() {
+      const diff = TARGET - Date.now();
+      if (diff <= 0) {
+        ids.forEach((id, i) => {
+          const el = document.getElementById(id);
+          if (el) el.textContent = i === 0 ? '0' : '00';
+        });
+        return;
+      }
+      const vals = [
+        Math.floor(diff / 86_400_000),
+        Math.floor((diff % 86_400_000) / 3_600_000),
+        Math.floor((diff % 3_600_000)  / 60_000),
+        Math.floor((diff % 60_000)     / 1_000),
+      ];
+      ids.forEach((id, i) => {
+        const el = document.getElementById(id);
+        if (el) el.textContent = i === 0 ? vals[i] : pad(vals[i]);
+      });
+    }
+
+    tick();
+    setInterval(tick, 1000);
+  })();
+</script>
+
 </body>
 </html>

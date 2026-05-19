@@ -47,8 +47,6 @@ if (!isset($incoming['userName']) || !isset($incoming['userData'])) {
 $userName = $incoming['userName'];
 $userData = $incoming['userData'];
 
-/* ---------------- FILE LOCK ---------------- */
-
 $fp = fopen($dataFile, 'c+');
 if (!$fp) {
     http_response_code(500);
@@ -63,46 +61,32 @@ if (!flock($fp, LOCK_EX)) {
     exit;
 }
 
-/* ---------------- READ CURRENT DATA ---------------- */
-
+$content = '';
 rewind($fp);
-$content = stream_get_contents($fp);
+while (!feof($fp)) {
+    $content .= fread($fp, 8192);
+}
 
-$current = [
-    'users' => [],
-    'jogos' => []
-];
-
-if (!empty($content)) {
+$current = [];
+if ($content !== '') {
     $parsed = json_decode($content, true);
-
-    if (json_last_error() === JSON_ERROR_NONE && is_array($parsed)) {
-        $current['users'] = $parsed['users'] ?? [];
-        $current['jogos'] = $parsed['jogos'] ?? [];
+    if (json_last_error() === JSON_ERROR_NONE && isset($parsed['users'])) {
+        $current = $parsed['users'];
     }
 }
 
-/* ---------------- UPDATE USER ---------------- */
+$current[$userName] = $userData;
 
-$current['users'][$userName] = $userData;
-
-/* ---------------- SAVE BACK ---------------- */
+$newContent = json_encode(
+    ['users' => $current],
+    JSON_UNESCAPED_UNICODE | JSON_PRETTY_PRINT
+);
 
 ftruncate($fp, 0);
 rewind($fp);
-
-fwrite(
-    $fp,
-    json_encode($current, JSON_UNESCAPED_UNICODE | JSON_PRETTY_PRINT)
-);
-
+fwrite($fp, $newContent);
 fflush($fp);
 flock($fp, LOCK_UN);
 fclose($fp);
 
-/* ---------------- RESPONSE ---------------- */
-
-echo json_encode([
-    'ok' => true,
-    'users' => count($current['users'])
-]);
+echo json_encode(['ok' => true, 'users' => count($current)]);
