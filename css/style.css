@@ -1042,3 +1042,9 @@ input[type=number]::-webkit-inner-spin-button { -webkit-appearance: none; }
 
   margin-top: 12px;
 }
+
+.palpite-icon img {
+  width: 70%;
+  height: 70%;
+  object-fit: contain;
+}

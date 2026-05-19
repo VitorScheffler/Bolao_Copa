@@ -8,34 +8,55 @@ document.addEventListener('DOMContentLoaded', () => {
   document.getElementById('login-name')
     ?.addEventListener('keydown', e => { if (e.key === 'Enter') login(); });
 
-  // Registra renderers para cada view
+  // Registra renderers para cada view (seguro)
   registerView('minha-classificacao', renderGroups);
-  registerView('meu-chaveamento',     renderChaveamento);
-  registerView('comparar',            renderCompare);
-  registerView('classificacao',       renderClassificacao);
-  registerView('chaveamento',         renderChaveamento);
-  registerView('calendario',          renderCalendario);
+  registerView('meu-chaveamento', renderChaveamento);
+  registerView('comparar', renderCompare);
+  registerView('classificacao', renderClassificacao);
+  registerView('chaveamento', renderChaveamento);
+  registerView('calendario', renderCalendario);
+  registerView('jogos', renderSelecoes);
 });
+
 
 // ── Render pós-login ──────────────────────────────────────────────────────────
 
 function renderApp() {
-  const user     = getCurrentUser();
-  const initials = user.split(' ').map(w => w[0]).slice(0, 2).join('').toUpperCase();
+  const user = getCurrentUser();
+  if (!user) return;
 
-  document.getElementById('user-badge').innerHTML =
-    `<div class="avatar">${initials}</div><span>${escHtml(user)}</span>`;
+  const initials = user
+    .split(' ')
+    .map(w => w[0])
+    .slice(0, 2)
+    .join('')
+    .toUpperCase();
+
+  const badge = document.getElementById('user-badge');
+  if (badge) {
+    badge.innerHTML =
+      `<div class="avatar">${initials}</div><span>${escHtml(user)}</span>`;
+  }
 
   // Reset navegação
-  document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('active'));
-  document.querySelector('[data-view="meus-palpites"]')?.classList.add('active');
-  document.querySelectorAll('.view').forEach(v => v.classList.remove('active'));
-  document.getElementById('view-meus-palpites')?.classList.add('active');
+  document.querySelectorAll('.nav-btn')
+    .forEach(b => b.classList.remove('active'));
+
+  document
+    .querySelector('[data-view="meus-palpites"]')
+    ?.classList.add('active');
+
+  document.querySelectorAll('.view')
+    .forEach(v => v.classList.remove('active'));
+
+  document
+    .getElementById('view-meus-palpites')
+    ?.classList.add('active');
+
   setCurrentView('meus-palpites');
 }
 
-// ── Helpers globais chamados pelo HTML ────────────────────────────────────────
-// (precisam ser globais pois são chamados via atributos onclick no markup)
+// ── Helpers globais chamados pelo HTML ───────────────────────────────────────
 
 window.login        = login;
 window.logout       = logout;
@@ -45,7 +66,7 @@ window.setView      = setView;
 window.saveAll      = saveAll;
 window.saveBracket  = saveBracket;
 
-// Score handlers (chamados pelos inputs gerados dinamicamente)
+// Score handlers
 window.onScoreChange         = onScoreChange;
 window.onOfficialScore       = onOfficialScore;
 window.onBracketScore        = onBracketScore;

@@ -918,6 +918,268 @@
                         "awayGoals": "1"
                     }
                 ]
+            },
+            "bracket": {
+                "r32": [
+                    {
+                        "id": 73,
+                        "label": "Jogo 73",
+                        "type": "fixed",
+                        "home": "África do Sul",
+                        "away": "Bósnia-Herzegovina",
+                        "awayOverride": "",
+                        "homeGoals": "",
+                        "awayGoals": ""
+                    },
+                    {
+                        "id": 74,
+                        "label": "Jogo 74",
+                        "type": "terceiro",
+                        "home": "Alemanha",
+                        "away": "3º A\/B\/C\/D\/F",
+                        "awayOverride": "",
+                        "homeGoals": "",
+                        "awayGoals": ""
+                    },
+                    {
+                        "id": 75,
+                        "label": "Jogo 75",
+                        "type": "fixed",
+                        "home": "Países Baixos",
+                        "away": "Marrocos",
+                        "awayOverride": "",
+                        "homeGoals": "",
+                        "awayGoals": ""
+                    },
+                    {
+                        "id": 76,
+                        "label": "Jogo 76",
+                        "type": "fixed",
+                        "home": "Brasil",
+                        "away": "Japão",
+                        "awayOverride": "",
+                        "homeGoals": "",
+                        "awayGoals": ""
+                    },
+                    {
+                        "id": 77,
+                        "label": "Jogo 77",
+                        "type": "terceiro",
+                        "home": "França",
+                        "away": "3º C\/D\/F\/G\/H",
+                        "awayOverride": "",
+                        "homeGoals": "",
+                        "awayGoals": ""
+                    },
+                    {
+                        "id": 78,
+                        "label": "Jogo 78",
+                        "type": "fixed",
+                        "home": "Curaçao",
+                        "away": "Senegal",
+                        "awayOverride": "",
+                        "homeGoals": "",
+                        "awayGoals": ""
+                    },
+                    {
+                        "id": 79,
+                        "label": "Jogo 79",
+                        "type": "terceiro",
+                        "home": "México",
+                        "away": "3º C\/E\/F\/H\/I",
+                        "awayOverride": "",
+                        "homeGoals": "",
+                        "awayGoals": ""
+                    },
+                    {
+                        "id": 80,
+                        "label": "Jogo 80",
+                        "type": "terceiro",
+                        "home": "Inglaterra",
+                        "away": "3º E\/H\/I\/J\/K",
+                        "awayOverride": "",
+                        "homeGoals": "",
+                        "awayGoals": ""
+                    },
+                    {
+                        "id": 81,
+                        "label": "Jogo 81",
+                        "type": "terceiro",
+                        "home": "EUA",
+                        "away": "3º B\/E\/F\/I\/J",
+                        "awayOverride": "",
+                        "homeGoals": "",
+                        "awayGoals": ""
+                    },
+                    {
+                        "id": 82,
+                        "label": "Jogo 82",
+                        "type": "terceiro",
+                        "home": "Bélgica",
+                        "away": "3º A\/E\/H\/I\/J",
+                        "awayOverride": "",
+                        "homeGoals": "",
+                        "awayGoals": ""
+                    },
+                    {
+                        "id": 83,
+                        "label": "Jogo 83",
+                        "type": "fixed",
+                        "home": "R.D. Congo",
+                        "away": "Croácia",
+                        "awayOverride": "",
+                        "homeGoals": "",
+                        "awayGoals": ""
+                    },
+                    {
+                        "id": 84,
+                        "label": "Jogo 84",
+                        "type": "fixed",
+                        "home": "Espanha",
+                        "away": "Argélia",
+                        "awayOverride": "",
+                        "homeGoals": "",
+                        "awayGoals": ""
+                    },
+                    {
+                        "id": 85,
+                        "label": "Jogo 85",
+                        "type": "terceiro",
+                        "home": "Canadá",
+                        "away": "3º E\/F\/G\/I\/J",
+                        "awayOverride": "",
+                        "homeGoals": "",
+                        "awayGoals": ""
+                    },
+                    {
+                        "id": 86,
+                        "label": "Jogo 86",
+                        "type": "fixed",
+                        "home": "Argentina",
+                        "away": "Cabo Verde",
+                        "awayOverride": "",
+                        "homeGoals": "",
+                        "awayGoals": ""
+                    },
+                    {
+                        "id": 87,
+                        "label": "Jogo 87",
+                        "type": "terceiro",
+                        "home": "Portugal",
+                        "away": "3º D\/E\/I\/J\/L",
+                        "awayOverride": "",
+                        "homeGoals": "",
+                        "awayGoals": ""
+                    },
+                    {
+                        "id": 88,
+                        "label": "Jogo 88",
+                        "type": "fixed",
+                        "home": "Paraguai",
+                        "away": "Egito",
+                        "awayOverride": "",
+                        "homeGoals": "",
+                        "awayGoals": ""
+                    }
+                ],
+                "r16": [
+                    {
+                        "homeGoals": "",
+                        "awayGoals": "",
+                        "home": "Venc. J73",
+                        "away": "Venc. J74"
+                    },
+                    {
+                        "homeGoals": "",
+                        "awayGoals": "",
+                        "home": "Venc. J75",
+                        "away": "Venc. J76"
+                    },
+                    {
+                        "homeGoals": "",
+                        "awayGoals": "",
+                        "home": "Venc. J77",
+                        "away": "Venc. J78"
+                    },
+                    {
+                        "homeGoals": "",
+                        "awayGoals": "",
+                        "home": "Venc. J79",
+                        "away": "Venc. J80"
+                    },
+                    {
+                        "homeGoals": "",
+                        "awayGoals": "",
+                        "home": "Venc. J81",
+                        "away": "Venc. J82"
+                    },
+                    {
+                        "homeGoals": "",
+                        "awayGoals": "",
+                        "home": "Venc. J83",
+                        "away": "Venc. J84"
+                    },
+                    {
+                        "homeGoals": "",
+                        "awayGoals": "",
+                        "home": "Venc. J85",
+                        "away": "Venc. J86"
+                    },
+                    {
+                        "homeGoals": "",
+                        "awayGoals": "",
+                        "home": "Venc. J87",
+                        "away": "Venc. J88"
+                    }
+                ],
+                "r8": [
+                    {
+                        "homeGoals": "",
+                        "awayGoals": "",
+                        "home": "Venc. J1",
+                        "away": "Venc. J2"
+                    },
+                    {
+                        "homeGoals": "",
+                        "awayGoals": "",
+                        "home": "Venc. J3",
+                        "away": "Venc. J4"
+                    },
+                    {
+                        "homeGoals": "",
+                        "awayGoals": "",
+                        "home": "Venc. J5",
+                        "away": "Venc. J6"
+                    },
+                    {
+                        "homeGoals": "",
+                        "awayGoals": "",
+                        "home": "Venc. J7",
+                        "away": "Venc. J8"
+                    }
+                ],
+                "r4": [
+                    {
+                        "homeGoals": "",
+                        "awayGoals": "",
+                        "home": "Venc. J1",
+                        "away": "Venc. J2"
+                    },
+                    {
+                        "homeGoals": "",
+                        "awayGoals": "",
+                        "home": "Venc. J3",
+                        "away": "Venc. J4"
+                    }
+                ],
+                "r2": [
+                    {
+                        "homeGoals": "",
+                        "awayGoals": "",
+                        "home": "Venc. J1",
+                        "away": "Venc. J2"
+                    }
+                ]
             }
         },
         "ChatGPT": {
