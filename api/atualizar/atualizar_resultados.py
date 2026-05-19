@@ -1,19 +1,19 @@
 """
-atualizar_oficial.py
+atualizar_resultados.py
 ====================
 Busca os resultados da Copa do Mundo 2026 e atualiza automaticamente
 o campo OFICIAL no arquivo data/bolao.json.
 
 Fontes suportadas (tenta na ordem, usa a primeira que funcionar):
-  1. placardefutebol.com.br  (scraping — requer navegador local)
-  2. worldcupjson.net        (API JSON gratuita)
+  1. worldcupjson.net        (API JSON gratuita)
+  2. placardefutebol.com.br  (scraping)
   3. football-data.org       (requer API key gratuita — opcional)
 
 Como usar
 ---------
   pip install requests beautifulsoup4 lxml
-  python atualizar_oficial.py            # roda uma vez
-  python atualizar_oficial.py --watch    # fica rodando a cada 5 min
+  python atualizar_resultados.py            # roda uma vez
+  python atualizar_resultados.py --watch    # fica rodando a cada 5 min
 
 Coloque este arquivo na raiz do projeto (ao lado de index.html).
 """
@@ -38,9 +38,15 @@ except ImportError:
 # CAMINHOS
 # ─────────────────────────────────────────────────────────────────────────────
 
-SCRIPT_DIR  = Path(__file__).parent
-BOLAO_FILE  = SCRIPT_DIR / "data" / "bolao.json"
-LOG_FILE    = SCRIPT_DIR / "data" / "atualizar_oficial.log"
+SCRIPT_DIR  = Path(__file__).resolve().parent
+
+# sobe até a raiz do projeto (/bolao)
+ROOT_DIR = SCRIPT_DIR.parent.parent
+
+DATA_DIR   = ROOT_DIR / "data"
+
+BOLAO_FILE = DATA_DIR / "bolao.json"
+LOG_FILE   = DATA_DIR / "atualizar_resultados.log"
 
 # ─────────────────────────────────────────────────────────────────────────────
 # GRUPOS E JOGOS DO BOLÃO (espelho de js/data.js)
@@ -374,7 +380,7 @@ def fetch_football_data(api_key: str) -> list[dict]:
     """
     https://www.football-data.org/  — plano gratuito inclui Copa do Mundo.
     Cadastre-se em https://www.football-data.org/client/register e obtenha sua chave.
-    Passe como: python atualizar_oficial.py --api-key SUA_CHAVE
+    Passe como: python atualizar_resultados.py --api-key SUA_CHAVE
     """
     r = requests.get(
         "https://api.football-data.org/v4/competitions/WC/matches",
@@ -506,7 +512,7 @@ def run(api_key: str | None = None, source: str = "auto"):
 
     sources_to_try = (
         [source] if source != "auto"
-        else ["placardefutebol", "worldcupjson"] + (["football-data"] if api_key else [])
+        else ["worldcupjson", "placardefutebol"] + (["football-data"] if api_key else [])
     )
 
     for src in sources_to_try:

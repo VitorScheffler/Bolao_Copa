@@ -682,25 +682,33 @@ input[type=number]::-webkit-inner-spin-button { -webkit-appearance: none; }
 
 .palpites-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
-  gap: 18px;
 
-  margin-top: 24px;
+  grid-template-columns:
+    repeat(auto-fit, minmax(420px, 1fr));
+
+  gap: 22px;
+
+  margin-top: 30px;
 }
 
 .palpite-card {
   display: flex;
   align-items: center;
-  gap: 18px;
+  gap: 20px;
 
-  padding: 22px;
+  padding: 28px;
+
+  min-height: 120px;
 
   background: var(--bg-card);
   border: 1px solid var(--border);
-  border-radius: 18px;
+  border-radius: 22px;
 
   cursor: pointer;
-  transition: 0.25s ease;
+  transition:
+    transform .25s ease,
+    box-shadow .25s ease,
+    border-color .25s ease;
 }
 
 .palpite-card:hover {
@@ -748,4 +756,125 @@ input[type=number]::-webkit-inner-spin-button { -webkit-appearance: none; }
 .palpite-card:hover .palpite-arrow {
   transform: translateX(4px);
   opacity: 1;
+}
+
+.btn-voltar{
+  margin-bottom: 20px;
+}
+
+/* ─────────────────────────────
+   CALENDÁRIO OUTLOOK
+───────────────────────────── */
+
+.calendar-nav {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.calendar-grid {
+  margin-top: 24px;
+  display: grid;
+  grid-template-columns: repeat(7, 1fr);
+  gap: 8px;
+
+  /* 👇 isso aqui garante alinhamento perfeito */
+  grid-auto-rows: 140px;
+}
+
+.calendar-cell {
+  height: 100%;
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  border-radius: 16px;
+  padding: 10px;
+
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+
+  overflow: hidden;
+}
+
+/* células vazias continuam iguais */
+.calendar-cell.empty {
+  background: transparent;
+  border: none;
+}
+
+/* dia fixo no topo */
+.calendar-day-number {
+  font-size: 1rem;
+  font-weight: 700;
+  flex-shrink: 0;
+}
+
+/* área de eventos com scroll interno (IMPORTANTE) */
+.calendar-cell {
+  height: 140px;              /* fixa */
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  border-radius: 16px;
+  padding: 8px;
+
+  display: flex;
+  flex-direction: column;
+
+  overflow: hidden;           /* impede estourar */
+}
+
+.calendar-events {
+  flex: 1;
+  overflow-y: auto;           /* 🔥 aqui resolve o corte */
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  margin-top: 6px;
+  padding-right: 4px;
+}
+
+/* eventos menores pra caberem */
+.calendar-event {
+  background: linear-gradient(135deg, #eb2525, #d81d1d);
+  color: white;
+
+  border-radius: 10px;
+  padding: 6px;
+
+  font-size: .72rem;
+
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+
+  cursor: pointer;
+}
+
+.calendar-event:hover {
+  transform: scale(1.02);
+}
+
+.event-time {
+  font-weight: 700;
+  opacity: .9;
+}
+
+.event-match {
+  line-height: 1.2;
+}
+
+@media (max-width: 900px) {
+
+  .calendar-grid {
+    grid-template-columns: repeat(1, 1fr);
+  }
+
+  .calendar-weekday {
+    display: none;
+  }
+
+  .calendar-cell {
+    min-height: auto;
+  }
+
 }

@@ -38,7 +38,6 @@ function buildGroupCard(g, teams, matches, locked) {
     return `<tr class="${rc}">
       <td><div class="team-cell">
         <span class="rank">${i + 1}</span>
-        <span class="flag">${FLAGS[t.name] || ''}</span>
         <span class="team-name">${escHtml(t.name)}</span>
       </div></td>
       <td class="pts">${t.pts}</td>
@@ -131,5 +130,5 @@ function refreshGroupStandings(g) {
 async function saveAll() {
   if (isCupStarted()) return;
   await saveToServer();
-  showToast('✅ Palpites salvos com sucesso!');
+  showToast('Palpites salvos com sucesso!');
 }

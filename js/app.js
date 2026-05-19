@@ -14,6 +14,7 @@ document.addEventListener('DOMContentLoaded', () => {
   registerView('comparar',            renderCompare);
   registerView('classificacao',       renderClassificacao);
   registerView('chaveamento',         renderChaveamento);
+  registerView('calendario',          renderCalendario);
 });
 
 // ── Render pós-login ──────────────────────────────────────────────────────────
@@ -45,7 +46,7 @@ window.saveAll      = saveAll;
 window.saveBracket  = saveBracket;
 
 // Score handlers (chamados pelos inputs gerados dinamicamente)
-window.onScoreChange        = onScoreChange;
-window.onOfficialScore      = onOfficialScore;
-window.onBracketScore       = onBracketScore;
+window.onScoreChange         = onScoreChange;
+window.onOfficialScore       = onOfficialScore;
+window.onBracketScore        = onBracketScore;
 window.onBracketAwayOverride = onBracketAwayOverride;

@@ -228,5 +228,5 @@ function _rerender() {
 async function saveBracket() {
   persistBracketToUser();
   await saveToServer();
-  showToast('✅ Chaveamento salvo!');
+  showToast('Chaveamento salvo!');
 }
