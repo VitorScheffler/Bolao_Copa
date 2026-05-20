@@ -1048,3 +1048,171 @@ input[type=number]::-webkit-inner-spin-button { -webkit-appearance: none; }
   height: 70%;
   object-fit: contain;
 }
+
+/* Container do Chaveamento */
+.bracket {
+    display: flex;
+    justify-content: space-between;
+    gap: 40px; /* Espaço reservado para as linhas de conexão */
+    width: 100%;
+    max-width: 1800px;
+    height: 1350px;
+}
+/* Coluna de cada Fase */
+/* Coluna */
+.fase {
+    display: flex;
+    flex-direction: column;
+    justify-content: space-around;
+    height: 100%;
+
+    flex: 0 0 260px; /* largura fixa */
+    position: relative;
+
+    padding-top: 40px;
+}
+
+/* Títulos absolutos para não quebrarem o cálculo do Flexbox */
+.fase h3 {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 30px;
+    color: #717782;
+    text-transform: uppercase;
+    font-size: 12px;
+    letter-spacing: 1px;
+    text-align: center;
+}
+
+/* Card de Jogo (Quadro) - Altura travada para consistência total */
+.quadro {
+    height: 72px;
+    background: #1f2229;
+    border: 1px solid #2d313a;
+    border-radius: 8px;
+    position: relative;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+    transition: border-color 0.2s ease, box-shadow 0.2s ease;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+}
+
+/* Linha de cada Time interna */
+.time {
+    height: 31px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 0 12px;
+    font-weight: 600;
+    font-size: 13px;
+    color: #e1e7f0;
+}
+
+.time:first-child {
+    border-bottom: 1px solid #2d313a;
+}
+
+.time img {
+    width: 18px;
+    height: 18px;
+    object-fit: cover;
+}
+
+/* ========================================================== */
+/* SISTEMA DE LIGAÇÕES RESPONSIVAS E ALINHADAS                */
+/* ========================================================== */
+
+/* Linha horizontal reta que sai da esquerda de cada card (Fases 2, 3, 4 e 5) */
+.fase:not(:first-child) .quadro::after {
+    content: "";
+    position: absolute;
+    left: -20px; /* Vai até a metade do caminho entre as colunas */
+    top: 50%;
+    width: 20px;
+    height: 2px;
+    background: #3b404c;
+    transition: background 0.2s ease;
+}
+
+/* Caixas conectoras verticais (Bordas em formato de "C" ou "U" virado para a esquerda) */
+.fase:not(:first-child):not(:last-child) .quadro::before {
+    content: "";
+    position: absolute;
+    left: -40px; /* Começa colado na fase anterior */
+    width: 20px;
+    border-top: 2px solid #3b404c;
+    border-bottom: 2px solid #3b404c;
+    border-right: 2px solid #3b404c;
+    border-radius: 0 4px 4px 0;
+    transition: border-color 0.2s ease;
+}
+
+/* Alturas verticais dinâmicas calculadas milimetricamente com base no espaço interno */
+.fase:nth-child(2) .quadro::before {
+    height: 72.5px;
+    top: calc(50% - 36.25px);
+}
+.fase:nth-child(3) .quadro::before {
+    height: 145px;
+    top: calc(50% - 72.5px);
+}
+.fase:nth-child(4) .quadro::before {
+    height: 290px;
+    top: calc(50% - 145px);
+}
+
+/* A grande Final precisa apenas de uma linha reta horizontal maior */
+.fase-final .quadro::after {
+    left: -40px;
+    width: 40px;
+}
+
+/* Interatividade: Quando passa o mouse no card, as linhas dele acendem */
+.quadro:hover::after { background: #58a6ff; }
+.quadro:hover::before { border-color: #58a6ff; }
+
+.fase-final h3 {
+    color: #ffd700;
+}
+
+.result {
+    margin-left: auto;
+}
+
+input.score-input-chave {
+  width: 42px;
+  height: 28px;
+  margin-left: auto;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  padding: 0;
+  flex-shrink: 0;
+  text-align: center;
+  font-size: 14px;
+  font-weight: 600;
+  border: 1px solid var(--border-md);
+  border-radius: 6px;
+  background: var(--bg-input);
+  color: var(--text);
+  appearance: textfield;
+  -moz-appearance: textfield;
+}
+
+/* Remove setinhas */
+.score-input-chave::-webkit-outer-spin-button,
+.score-input-chave::-webkit-inner-spin-button {
+  -webkit-appearance: none;
+  margin: 0;
+}
+
+.score-input-chave:focus {
+  border-color: var(--blue);
+  background: var(--bg-card);
+}
