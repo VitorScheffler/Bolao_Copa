@@ -1,7 +1,28 @@
 {
   "fonte": "worldcupjson",
-  "ultimaAtualizacao": "2026-05-19T11:29:52.022337",
-  "artilharia": [],
+  "ultimaAtualizacao": "2026-06-12T07:33:37.273422",
+  "artilharia": [
+    {
+      "nome": "Julián Quiñones",
+      "gols": 1
+    },
+    {
+      "nome": "Raúl Jiménez",
+      "gols": 1
+    },
+    {
+      "nome": "Hwang In-Beom",
+      "gols": 1
+    },
+    {
+      "nome": "Oh Hyeon-Gyu",
+      "gols": 1
+    },
+    {
+      "nome": "Ladislav Krejcí",
+      "gols": 1
+    }
+  ],
   "cartoesAmarelos": [],
   "cartoesVermelhos": []
 }

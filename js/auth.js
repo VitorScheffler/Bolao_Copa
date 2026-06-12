@@ -15,7 +15,7 @@ async function login() {
     return;
   }
 
-  if (name === 'OFICIAL') {
+  if (['OFICIAL', 'DeepSeek', 'ChatGPT'].includes(name)) {
     const senha = prompt('Digite a senha do administrador:');
     if (senha !== ADMIN_PASSWORD) {
       showError(errEl, 'Senha inválida.');
@@ -66,7 +66,7 @@ function showError(el, msg) {
 // ── RENDER: LISTA DE USUÁRIOS NA TELA DE LOGIN ────────────────────────────────
 
 function renderLoginUsers() {
-  const names     = Object.keys(getAllUsers()).filter(n => n !== 'OFICIAL');
+  const names = Object.keys(getAllUsers()).filter(n => !['OFICIAL', 'DeepSeek', 'ChatGPT'].includes(n));
   const container = document.getElementById('login-users-list');
   if (!container) return;
 

@@ -1,13 +1,10 @@
 """
 atualizar_resultados.py
 ====================
-Busca os resultados da Copa do Mundo 2026 e atualiza automaticamente
-o campo OFICIAL no arquivo data/bolao.json.
+Busca os resultados da Copa do Mundo 2026 no placardefutebol.com.br
+e atualiza automaticamente o campo OFICIAL no arquivo data/bolao.json.
 
-Fontes suportadas (tenta na ordem, usa a primeira que funcionar):
-  1. worldcupjson.net        (API JSON gratuita)
-  2. placardefutebol.com.br  (scraping)
-  3. football-data.org       (requer API key gratuita — opcional)
+Fonte: https://www.placardefutebol.com.br/  (scraping)
 
 Como usar
 ---------
@@ -19,8 +16,6 @@ Coloque este arquivo na raiz do projeto (ao lado de index.html).
 """
 
 import json
-import os
-import re
 import sys
 import time
 import argparse
@@ -46,6 +41,7 @@ ROOT_DIR = SCRIPT_DIR.parent.parent
 DATA_DIR   = ROOT_DIR / "data"
 
 BOLAO_FILE = DATA_DIR / "bolao.json"
+RESULTADOS_FILE = DATA_DIR / "resultados_placar.json"
 LOG_FILE   = DATA_DIR / "atualizar_resultados.log"
 
 # ─────────────────────────────────────────────────────────────────────────────
@@ -95,6 +91,7 @@ NAME_MAP = {
     "mexico":                   "México",
     "méxico":                   "México",
     "africa do sul":            "África do Sul",
+    "áfrica do sul":            "África do Sul",
     "africa-do-sul":            "África do Sul",
     "south africa":             "África do Sul",
     "coreia do sul":            "Coreia do Sul",
@@ -102,6 +99,7 @@ NAME_MAP = {
     "korea republic":           "Coreia do Sul",
     "rep. tcheca":              "Rep. Tcheca",
     "republica tcheca":         "Rep. Tcheca",
+    "república tcheca":         "Rep. Tcheca",
     "czech republic":           "Rep. Tcheca",
     "czechia":                  "Rep. Tcheca",
 
@@ -242,6 +240,14 @@ def normalize_team(name: str) -> str | None:
     key = " ".join(key.split())   # normaliza espaços
     return NAME_MAP.get(key)
 
+# Rede de segurança: garante que o próprio nome canônico (como aparece em
+# GROUPS) também seja reconhecido, mesmo que falte no NAME_MAP acima.
+for _teams in GROUPS.values():
+    for _team in _teams:
+        _key = _team.strip().lower().replace("'", "").replace("-", " ").replace(".", " ")
+        _key = " ".join(_key.split())
+        NAME_MAP.setdefault(_key, _team)
+
 # ─────────────────────────────────────────────────────────────────────────────
 # ÍNDICE: (home, away) → (grupo, índice_do_jogo)
 # ─────────────────────────────────────────────────────────────────────────────
@@ -263,7 +269,7 @@ def build_match_index():
 MATCH_INDEX = build_match_index()
 
 # ─────────────────────────────────────────────────────────────────────────────
-# FONTE 1: placardefutebol.com.br
+# FONTE: placardefutebol.com.br
 # ─────────────────────────────────────────────────────────────────────────────
 
 PLACAR_HEADERS = {
@@ -282,8 +288,8 @@ FINISHED_STATUSES = {"encerrado", "fim de jogo", "finalizado", "ft", "aet"}
 def fetch_placardefutebol() -> list[dict]:
     """
     Faz scraping do placardefutebol.com.br e retorna lista de:
-      { home, away, homeGoals, awayGoals, status }
-    Só jogos ENCERRADOS.
+      { home, away, homeGoals, awayGoals, status, league }
+    Só jogos ENCERRADOS da Copa do Mundo.
     """
     r = requests.get(
         "https://www.placardefutebol.com.br/",
@@ -293,123 +299,53 @@ def fetch_placardefutebol() -> list[dict]:
     r.raise_for_status()
 
     soup = BeautifulSoup(r.text, "lxml")
-    leagues = soup.find_all("h3", class_="match-list_league-name")
-    blocks  = soup.find_all("div", class_="container content")
+
+    # Cada jogo é uma <div class="row align-items-center content"> dentro de
+    # um <a href="/copa-do-mundo/..."> que também contém
+    # <div class="match-card-league-name">Copa do Mundo</div>
+    matches = soup.find_all("div", class_="row align-items-center content")
 
     results = []
 
-    for block_idx, block in enumerate(blocks):
-        league = leagues[block_idx].text.strip() if block_idx < len(leagues) else ""
-        matches = block.find_all("div", class_="row align-items-center content")
+    for match in matches:
+        status_el = match.find("span", class_="status-name")
+        status    = status_el.get_text(strip=True).lower() if status_el else ""
 
-        for match in matches:
-            status_el = match.find("span", class_="status-name")
-            status    = status_el.text.strip().lower() if status_el else ""
-
-            # Só processa jogos já encerrados
-            if status not in FINISHED_STATUSES:
-                continue
-
-            teams  = match.find_all("div", class_="team-name")
-            scores = match.find_all("span", class_="badge badge-default")
-
-            if len(teams) < 2 or len(scores) < 2:
-                continue
-
-            home_name  = teams[0].text.strip()
-            away_name  = teams[1].text.strip()
-            home_goals = scores[0].text.strip()
-            away_goals = scores[1].text.strip()
-
-            results.append({
-                "home":      home_name,
-                "away":      away_name,
-                "homeGoals": home_goals,
-                "awayGoals": away_goals,
-                "status":    status,
-                "league":    league,
-            })
-
-    return results
-
-# ─────────────────────────────────────────────────────────────────────────────
-# FONTE 2: worldcupjson.net
-# ─────────────────────────────────────────────────────────────────────────────
-
-def fetch_worldcupjson() -> list[dict]:
-    """
-    API JSON gratuita: https://worldcupjson.net/matches
-    Retorna todos os jogos com resultado.
-    """
-    r = requests.get(
-        "https://worldcupjson.net/matches",
-        timeout=15,
-        headers={"User-Agent": "bolao-copa-2026/1.0"},
-    )
-    r.raise_for_status()
-    data = r.json()
-
-    results = []
-    for m in data:
-        if m.get("status") not in ("completed", "in progress"):
+        # Só processa jogos já encerrados
+        if status not in FINISHED_STATUSES:
             continue
-        home = m.get("home_team", {}).get("name", "")
-        away = m.get("away_team", {}).get("name", "")
-        home_goals = m.get("home_team", {}).get("goals")
-        away_goals = m.get("away_team", {}).get("goals")
 
-        if home_goals is None or away_goals is None:
+        # Liga: pega do <div class="match-card-league-name"> dentro do <a> pai
+        league = ""
+        parent_a = match.find_parent("a")
+        if parent_a:
+            league_el = parent_a.find("div", class_="match-card-league-name")
+            if league_el:
+                league = league_el.get_text(strip=True)
+
+        # Filtra apenas jogos da Copa do Mundo (ignora outros campeonatos
+        # que também aparecem como "encerrado" na home do site)
+        if "copa do mundo" not in league.lower():
             continue
+
+        teams  = match.find_all("div", class_="team-name")
+        scores = match.find_all("span", class_="badge badge-default")
+
+        if len(teams) < 2 or len(scores) < 2:
+            continue
+
+        home_name  = teams[0].get_text(strip=True)
+        away_name  = teams[1].get_text(strip=True)
+        home_goals = scores[0].get_text(strip=True)
+        away_goals = scores[1].get_text(strip=True)
 
         results.append({
-            "home":      home,
-            "away":      away,
-            "homeGoals": str(home_goals),
-            "awayGoals": str(away_goals),
-            "status":    m.get("status", ""),
-            "league":    "Copa do Mundo 2026",
-        })
-
-    return results
-
-# ─────────────────────────────────────────────────────────────────────────────
-# FONTE 3: football-data.org (requer API key gratuita)
-# ─────────────────────────────────────────────────────────────────────────────
-
-def fetch_football_data(api_key: str) -> list[dict]:
-    """
-    https://www.football-data.org/  — plano gratuito inclui Copa do Mundo.
-    Cadastre-se em https://www.football-data.org/client/register e obtenha sua chave.
-    Passe como: python atualizar_resultados.py --api-key SUA_CHAVE
-    """
-    r = requests.get(
-        "https://api.football-data.org/v4/competitions/WC/matches",
-        headers={"X-Auth-Token": api_key},
-        timeout=15,
-    )
-    r.raise_for_status()
-    data = r.json()
-
-    results = []
-    for m in data.get("matches", []):
-        if m.get("status") != "FINISHED":
-            continue
-        home = m["homeTeam"]["name"]
-        away = m["awayTeam"]["name"]
-        score = m.get("score", {}).get("fullTime", {})
-        home_goals = score.get("home")
-        away_goals = score.get("away")
-
-        if home_goals is None or away_goals is None:
-            continue
-
-        results.append({
-            "home":      home,
-            "away":      away,
-            "homeGoals": str(home_goals),
-            "awayGoals": str(away_goals),
-            "status":    "FINISHED",
-            "league":    "FIFA World Cup",
+            "home":      home_name,
+            "away":      away_name,
+            "homeGoals": home_goals,
+            "awayGoals": away_goals,
+            "status":    status,
+            "league":    league,
         })
 
     return results
@@ -483,6 +419,18 @@ def save_bolao(data: dict):
         json.dump(data, f, ensure_ascii=False, indent=4)
     tmp.replace(BOLAO_FILE)
 
+def save_raw_results(raw_results: list[dict]):
+    """Salva os jogos encerrados coletados (lista crua) em data/resultados_placar.json."""
+    RESULTADOS_FILE.parent.mkdir(parents=True, exist_ok=True)
+    payload = {
+        "lastUpdate": datetime.now(timezone.utc).isoformat(),
+        "jogos": raw_results,
+    }
+    tmp = RESULTADOS_FILE.with_suffix(".tmp")
+    with open(tmp, "w", encoding="utf-8") as f:
+        json.dump(payload, f, ensure_ascii=False, indent=4)
+    tmp.replace(RESULTADOS_FILE)
+
 # ─────────────────────────────────────────────────────────────────────────────
 # LOGGING
 # ─────────────────────────────────────────────────────────────────────────────
@@ -502,43 +450,25 @@ def log(msg: str):
 # EXECUÇÃO PRINCIPAL
 # ─────────────────────────────────────────────────────────────────────────────
 
-def run(api_key: str | None = None, source: str = "auto"):
+def run():
     log("═" * 60)
-    log("Iniciando atualização do OFICIAL…")
+    log("Iniciando atualização do OFICIAL (fonte: placardefutebol.com.br)…")
 
     # 1. Busca resultados
-    raw_results = []
-    errors      = []
-
-    sources_to_try = (
-        [source] if source != "auto"
-        else ["worldcupjson", "placardefutebol"] + (["football-data"] if api_key else [])
-    )
-
-    for src in sources_to_try:
-        try:
-            if src == "placardefutebol":
-                log("Tentando fonte: placardefutebol.com.br…")
-                raw_results = fetch_placardefutebol()
-            elif src == "worldcupjson":
-                log("Tentando fonte: worldcupjson.net…")
-                raw_results = fetch_worldcupjson()
-            elif src == "football-data" and api_key:
-                log("Tentando fonte: football-data.org…")
-                raw_results = fetch_football_data(api_key)
-            else:
-                continue
-
-            log(f"  ✔ {len(raw_results)} jogo(s) encontrado(s).")
-            break
-
-        except Exception as e:
-            log(f"  ✘ Falha na fonte '{src}': {e}")
-            errors.append(str(e))
+    try:
+        raw_results = fetch_placardefutebol()
+        log(f"  ✔ {len(raw_results)} jogo(s) encerrado(s) encontrado(s).")
+    except Exception as e:
+        log(f"  ✘ Falha ao buscar placardefutebol.com.br: {e}")
+        return
 
     if not raw_results:
-        log("⚠  Nenhuma fonte retornou resultados. Abortando.")
+        log("⚠  Nenhum jogo encerrado encontrado. Nada a atualizar.")
         return
+
+    # 1b. Salva os resultados brutos coletados em data/resultados_placar.json
+    save_raw_results(raw_results)
+    log(f"  💾 Resultados brutos salvos em {RESULTADOS_FILE}")
 
     # 2. Carrega bolao.json
     bolao = load_bolao()
@@ -562,7 +492,7 @@ def run(api_key: str | None = None, source: str = "auto"):
 
     log(f"✔ {n_updated} jogo(s) atualizado(s) em data/bolao.json")
     if not_found:
-        log(f"⚠  {len(not_found)} jogo(s) não reconhecido(s):")
+        log(f"⚠  {len(not_found)} jogo(s) não reconhecido(s) (ignorados, provavelmente não são da Copa):")
         for nf in not_found:
             log(f"   - {nf}")
 
@@ -574,7 +504,7 @@ def run(api_key: str | None = None, source: str = "auto"):
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(
-        description="Atualiza resultados do OFICIAL no bolao.json automaticamente."
+        description="Atualiza resultados do OFICIAL no bolao.json a partir do placardefutebol.com.br."
     )
     parser.add_argument(
         "--watch", "-w",
@@ -587,17 +517,6 @@ if __name__ == "__main__":
         default=5,
         help="Intervalo em minutos para o modo --watch (padrão: 5)",
     )
-    parser.add_argument(
-        "--source", "-s",
-        choices=["auto", "placardefutebol", "worldcupjson", "football-data"],
-        default="auto",
-        help="Fonte de dados a usar (padrão: auto — tenta todas)",
-    )
-    parser.add_argument(
-        "--api-key", "-k",
-        default=None,
-        help="API key do football-data.org (opcional, só para essa fonte)",
-    )
 
     args = parser.parse_args()
 
@@ -605,9 +524,9 @@ if __name__ == "__main__":
         log(f"Modo watch ativo — atualizando a cada {args.interval} minuto(s).")
         while True:
             try:
-                run(api_key=args.api_key, source=args.source)
+                run()
             except Exception as e:
                 log(f"❌ Erro inesperado: {e}")
             time.sleep(args.interval * 60)
     else:
-        run(api_key=args.api_key, source=args.source)
+        run()
